@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="referrer" content="no-referrer">
     
-    <title>Khung Ảnh Số Thông Minh - Thương Mại SaaS</title>
+    <title>Khung Ảnh Số Thông Minh - V103 SaaS Pro</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +39,7 @@
         .tap-target { -webkit-tap-highlight-color: transparent; outline: none; border: none; background: transparent; cursor: pointer; transition: opacity 0.2s; }
         .tap-target:active { opacity: 0.6; }
 
-        /* CỘT TRÁI TRÊN */
+        /* CỘT TRÁI TRÊN (GIỜ LỊCH CĂN GIỮA) */
         #info-container { position: absolute; top: 35px; left: 35px; z-index: 4; text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; width: auto; transition: transform 2s ease-in-out; }
         #clock-flex-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; margin-left: 0; }
         .hours-style, .minutes-style { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 6.5rem; letter-spacing: -2px; display: block; line-height: 0.85; transition: color 0.5s, font-family 0.5s; width: 100%; text-align: center; margin-left: 0; } 
@@ -126,6 +126,7 @@
         <div id="brightness-overlay"></div>
         <div id="toast-msg">Thông báo</div>
 
+        <!-- CỘT TRÁI TRÊN -->
         <div id="info-container">
             <div id="clock-flex-wrapper">
                 <span class="hours-style tap-target" id="hr-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00</span>
@@ -140,6 +141,7 @@
             <span class="night-minutes tap-target" id="night-min-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00</span>
         </div>
 
+        <!-- CỘT PHẢI TRÊN (NHIỆT ĐỘ TRÊN - THỜI TIẾT DƯỚI CĂN TÂM TRỤC) -->
         <div id="top-right-wrapper">
             <div id="right-env-container" class="tap-target" ontouchstart="handleAction(event, 'open_location')" onclick="handleAction(event, 'open_location')"></div>
             <div id="temp-wrapper" class="tap-target" ontouchstart="handleAction(event, 'next')" onclick="handleAction(event, 'next')">
@@ -147,6 +149,7 @@
             </div>
         </div>
         
+        <!-- CỘT ĐÁY -->
         <div id="bottom-container">
             <div id="bottom-left-events" class="tap-target" ontouchstart="handleAction(event, 'show_birth')" onclick="handleAction(event, 'show_birth')"></div>
             <div id="bottom-right-text" class="tap-target" ontouchstart="handleAction(event, 'show_death')" onclick="handleAction(event, 'show_death')">
@@ -154,6 +157,7 @@
             </div>
         </div>
         
+        <!-- BẢNG CÀI ĐẶT VỊ TRÍ -->
         <div id="location-modal" class="modal-base">
             <div class="modal-title">CÀI ĐẶT VỊ TRÍ</div>
             <input type="text" id="loc-name" class="loc-input" placeholder="Tên địa phương (VD: Tân Lập)">
@@ -166,23 +170,36 @@
             <button class="btn-close-modal" ontouchstart="closeLocationModal(); event.preventDefault();" onclick="closeLocationModal()">Đóng (Hủy)</button>
         </div>
 
+        <!-- BẢNG DANH SÁCH LỊCH SỰ KIỆN -->
         <div id="list-modal" class="modal-base">
             <div id="list-title" class="modal-title">DANH SÁCH</div>
             <div id="list-content"></div>
             <button class="btn-close-modal" style="margin-top:10px;" ontouchstart="closeListModal(); event.preventDefault();" onclick="closeListModal()">Đóng bảng</button>
         </div>
+
     </div>
 
     <script>
-        var urlParams = new URLSearchParams(window.location.search);
+        // 🌟 NÂNG CẤP BỘ ĐỌC URL AN TOÀN TUYỆT ĐỐI CHO TẤT CẢ CÁC ĐỜI IPAD
+        function getQueryParam(param) {
+            var search = window.location.search.substring(1);
+            if (!search) return null;
+            var vars = search.split('&');
+            for (var i = 0; i < vars.length; i++) {
+                var pair = vars[i].split('=');
+                if (decodeURIComponent(pair[0]) === param) { return decodeURIComponent(pair[1]); }
+            }
+            return null;
+        }
+
         var SECRET_ENCODED = 'QUl6YVN5REwyRm1VQzkxMUtBTnFwN3VPbnZKcU5xVHltb1R2SkxF'; 
-        
-        var API_KEY = urlParams.get('k') ? urlParams.get('k').trim() : atob(SECRET_ENCODED); 
-        var FOLDER_ID = urlParams.get('f') ? urlParams.get('f').trim() : '1r1WUIKwAPAnsyIh-Zot7AevEW0uEZ-Hl';
+        var API_KEY = getQueryParam('k') ? getQueryParam('k').trim() : atob(SECRET_ENCODED); 
+        var FOLDER_ID = getQueryParam('f') ? getQueryParam('f').trim() : '1r1WUIKwAPAnsyIh-Zot7AevEW0uEZ-Hl';
 
         var images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048&auto=format&fit=crop']; 
         var currentIndex = 0; var slideInterval; var toastTimeout; var locationModalTimeout; var listModalTimeout;
         var audioCtx = null; var isGroup1Active = true; var audioUnlocked = false; var forceNightMode = null; 
+        var isSystemError = false; // 🌟 Cờ hiệu khoá thông báo lỗi để không bị ghi đè
         
         var globalAQI = "--", globalHum = "--", globalRain = "--", globalSunrise = "--", globalSunset = "--"; 
         var globalWind = "--", globalUV = "--", globalAlt = "--";
@@ -228,19 +245,15 @@
             [2030, 0, 6, 11, "Kỷ Dậu"], [2030, 1, 5, 12, "Kỷ Dậu"], [2030, 2, 3, 1, "Canh Tuất"], [2030, 3, 5, 2, "Canh Tuất"], [2030, 4, 3, 3, "Canh Tuất"], [2030, 5, 2, 4, "Canh Tuất"], [2030, 6, 1, 5, "Canh Tuất"], [2030, 6, 30, 6, "Canh Tuất"], [2030, 7, 30, 7, "Canh Tuất"], [2030, 8, 29, 8, "Canh Tuất"], [2030, 9, 27, 9, "Canh Tuất"], [2030, 10, 27, 10, "Canh Tuất"], [2030, 11, 26, 11, "Canh Tuất"]
         ];
 
-        function rotateWeatherDisplay() {
-            var envPool = [
-                'AQI <span style="color:' + getEnvColor('aqi', globalAQI) + '; font-weight:700;">' + globalAQI + '</span>',
-                '☀️ <span style="color:' + getEnvColor('uv', globalUV) + '; font-weight:700;">' + globalUV + '</span>',
-                '🌧️ <span style="color:' + getEnvColor('rain', parseFloat(globalRain)) + '; font-weight:700;">' + globalRain + '</span>',
-                '💧 ' + globalHum,
-                '🌅 ' + globalSunrise + '-' + globalSunset
-            ];
-            var currentEnv = envPool[envDisplayIndex % envPool.length]; envDisplayIndex++;
-            var container = document.getElementById('right-env-container');
-            if(container) { container.innerHTML = '<div class="env-rotating-item">' + currentEnv + '</div>'; syncEnvWidth(); }
+        function getEnvColor(type, val) {
+            var strVal = String(val).trim(); 
+            if (strVal === "--" || strVal.indexOf('--') !== -1) return "#ffffff";
+            var v = parseFloat(strVal);
+            if (type === 'aqi') { if (v <= 50) return "#ffffff"; if (v <= 100) return "#F4B41A"; if (v <= 150) return "#FF9500"; return "#FF3366"; }
+            if (type === 'uv') { if (v <= 2) return "#ffffff"; if (v <= 5) return "#F4B41A"; if (v <= 7) return "#FF9500"; return "#FF3366"; }
+            if (type === 'rain') { if (v < 51) return "#ffffff"; if (v <= 75) return "#F4B41A"; return "#FF3366"; }
+            return "#ffffff";
         }
-        setInterval(rotateWeatherDisplay, 120000);
 
         function syncEnvWidth() {
             setTimeout(function() {
@@ -256,13 +269,29 @@
             }, 50); 
         }
 
+        function rotateWeatherDisplay() {
+            var envPool = [
+                'AQI <span style="color:' + getEnvColor('aqi', globalAQI) + '; font-weight:700;">' + globalAQI + '</span>',
+                '☀️ <span style="color:' + getEnvColor('uv', globalUV) + '; font-weight:700;">' + globalUV + '</span>',
+                '🌧️ <span style="color:' + getEnvColor('rain', parseFloat(globalRain)) + '; font-weight:700;">' + globalRain + '</span>',
+                '💧 ' + globalHum,
+                '🌅 ' + globalSunrise + '-' + globalSunset
+            ];
+            var currentEnv = envPool[envDisplayIndex % envPool.length]; envDisplayIndex++;
+            var container = document.getElementById('right-env-container');
+            if(container) { container.innerHTML = '<div class="env-rotating-item">' + currentEnv + '</div>'; syncEnvWidth(); }
+        }
+        setInterval(rotateWeatherDisplay, 120000);
+
         function fetchConfigFromDrive() {
             var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
             var url = 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)';
             var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
             xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); }
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); }
+                    } else { console.log("Không tìm thấy cauhinh.txt"); }
                 }
             }; xhr.send();
         }
@@ -318,13 +347,48 @@
             updateWeatherAndAQI(); updateClock(); updateDynamicContentBySlide(); checkForBirthdayMusic('load');
         }
 
+        function showToast(msg) {
+            var toast = document.getElementById('toast-msg'); toast.innerText = msg; toast.classList.add('show');
+            if(toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(function() { toast.classList.remove('show'); }, 3000);
+        }
+
+        function applyClockStyle() {
+            var s = clockStyles[currentStyleIdx]; var hrNode = document.getElementById('hr-node'); var minNode = document.getElementById('min-node');
+            hrNode.style.fontFamily = s.f; hrNode.style.color = s.hc; hrNode.style.fontWeight = s.fw;
+            minNode.style.fontFamily = s.f; minNode.style.color = s.mc; minNode.style.fontWeight = s.fw;
+            localStorage.setItem('clockStyle', currentStyleIdx);
+        }
+
+        function playNote(freq, startTime, duration, type) {
+            if (!audioCtx) return;
+            var osc = audioCtx.createOscillator(); var gainNode = audioCtx.createGain(); osc.type = type || 'sine'; osc.frequency.setValueAtTime(freq, startTime);
+            gainNode.gain.setValueAtTime(0.2, startTime); gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.start(startTime); osc.stop(startTime + duration);
+        }
+
+        function playSolemnChime() {
+            if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            var t = audioCtx.currentTime;
+            playNote(220.00, t, 3.5, 'sine'); playNote(440.00, t + 0.2, 3.0, 'sine'); playNote(554.37, t + 0.5, 3.0, 'sine'); playNote(659.25, t + 0.8, 3.0, 'sine'); playNote(880.00, t + 1.2, 4.0, 'sine'); 
+        }
+
+        function playHappyBirthday() {
+            if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            var t = audioCtx.currentTime; var tempo = 0.45; 
+            function p(f, d) { playNote(f, t, d * tempo, 'triangle'); t += d * tempo; }
+            p(261.63, 0.75); p(261.63, 0.25); p(293.66, 1); p(261.63, 1); p(349.23, 1); p(329.63, 2);
+            p(261.63, 0.75); p(261.63, 0.25); p(293.66, 1); p(261.63, 1); p(392.00, 1); p(349.23, 2);
+            p(261.63, 0.75); p(261.63, 0.25); p(523.25, 1); p(440.00, 1); p(349.23, 1); p(329.63, 1); p(293.66, 2);
+            p(466.16, 0.75); p(466.16, 0.25); p(440.00, 1); p(349.23, 1); p(392.00, 1); p(349.23, 2);
+        }
+
         function openLocationModal() {
             var modal = document.getElementById('location-modal');
             document.getElementById('loc-name').value = clientLocalName; document.getElementById('loc-lat').value = clientLatitude; document.getElementById('loc-lon').value = clientLongitude;
-            modal.classList.add('show-modal'); if (locationModalTimeout) clearTimeout(locationModalTimeout);
-            locationModalTimeout = setTimeout(closeLocationModal, 60000); 
+            modal.classList.add('show-modal'); if (locationModalTimeout) clearTimeout(locationModalTimeout); locationModalTimeout = setTimeout(closeLocationModal, 60000); 
         }
-
         function closeLocationModal() { document.getElementById('location-modal').classList.remove('show-modal'); if (locationModalTimeout) clearTimeout(locationModalTimeout); }
 
         function saveLocation() {
@@ -369,7 +433,7 @@
             }
             else if (action === 'interval') { currentIntervalIdx = (currentIntervalIdx + 1) % stepSeconds.length; var mins = stepSeconds[currentIntervalIdx] / 60; changeIntervalMode(currentIntervalIdx + 1); showToast("⏳ Đổi thời gian ảnh: " + mins + " Phút"); }
             else if (action === 'next') { forceNextSlide(); }
-            else if (action === 'chime') { playSolemnChime(); }
+            else if (action === 'chime') { showToast("🔔 Thử chuông báo"); playSolemnChime(); }
             else if (action === 'open_location') { openLocationModal(); }
             else if (action === 'show_birth') { showAllLists('birth'); }
             else if (action === 'show_death') { showAllLists('death'); }
@@ -422,7 +486,9 @@
                 }
             }
             var leftContainer = document.getElementById('bottom-left-events'); if (leftContainer && leftContainer.innerHTML !== leftHtml) { leftContainer.innerHTML = leftHtml; }
-            windowDeathList = []; var currentDeaths = []; for (var a = 0; a < anniversaries.length; a++) { if (anniversaries[a].m === lMonth) currentDeaths.push(anniversaries[a]); }
+
+            windowDeathList = []; var currentDeaths = [];
+            for (var a = 0; a < anniversaries.length; a++) { if (anniversaries[a].m === lMonth) currentDeaths.push(anniversaries[a]); }
             currentDeaths.sort(function(a, b) { return a.d - b.d; });
             if (currentDeaths.length > 0) {
                 for (var j = 0; j < currentDeaths.length; j++) {
@@ -450,6 +516,7 @@
         function updateClock() {
             var now = new Date(); var hours = now.getHours(); var minutes = now.getMinutes(); var seconds = now.getSeconds();
             if (hours === wakeUpHour && minutes === 0 && seconds === 0) { forceNightMode = null; syncDriveData(); }
+
             var hrStr = hours < 10 ? '0' + hours : hours; var minStr = minutes < 10 ? '0' + minutes : minutes;
             var hrNode = document.getElementById('hr-node'); var minNode = document.getElementById('min-node'); var nHrNode = document.getElementById('night-hr-node'); var nMinNode = document.getElementById('night-min-node');
             if(hrNode.innerText !== hrStr) hrNode.innerText = hrStr; if(minNode.innerText !== minStr) minNode.innerText = minStr;
@@ -466,9 +533,8 @@
             var checkTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0); var activePhase = phases[0];
             for (var i = 0; i < phases.length; i++) { var d = new Date(phases[i][0], phases[i][1], phases[i][2], 0, 0, 0); if (checkTime >= d) activePhase = phases[i]; else break; }
             var startDate = new Date(activePhase[0], activePhase[1], activePhase[2], 0, 0, 0); var currentLunarDay = Math.floor((checkTime - startDate) / (1000 * 60 * 60 * 24)) + 1; var currentLunarMonth = (activePhase[1] === 0 ? 12 : activePhase[1]);
-            var shortDays = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
             
-            // 🌟 ĐÃ VÁ LỖI CÚ PHÁP: Khai báo rõ ràng cấu trúc biến nội dung trước khi render
+            var shortDays = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
             var solarHtml = '<span class="highlight-yellow">' + shortDays[now.getDay()] + '</span> ' + now.getDate() + '/' + (now.getMonth() + 1);
             var solarNode = document.getElementById('date-solar-top'); if(solarNode.innerHTML !== solarHtml) solarNode.innerHTML = solarHtml;
             var lunarHtml = '<span class="highlight-yellow">AL</span> ' + currentLunarDay + '/' + currentLunarMonth;
@@ -497,23 +563,26 @@
         function updateWeatherAndAQI() {
             var lat = parseFloat(clientLatitude); var lon = parseFloat(clientLongitude); if (isNaN(lat) || !lat) { lat = 12.6792; lon = 108.0694; }
             var cb = new Date().getTime();
-            if (document.getElementById('weather-val').innerText === "--") {
+
+            // Sửa lỗi gán mặc định (vượt qua kiểm tra dấu cách hoặc ký tự lạ)
+            if (document.getElementById('weather-val').innerText.trim() === "--") {
                 document.getElementById('weather-val').innerText = "26"; globalHum = "75%"; globalRain = "10%"; globalWind = "8 km/h"; globalUV = "1.0"; globalAlt = "473m"; globalSunrise = "05:24"; globalSunset = "18:12"; globalAQI = 40; rotateWeatherDisplay();
             }
+
             var xhrW = new XMLHttpRequest(); xhrW.timeout = 8000;
             xhrW.open('GET', 'https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(4) + '&longitude=' + lon.toFixed(4) + '&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,uv_index&daily=sunrise,sunset&timezone=Asia%2FHo_Chi_Minh&forecast_days=1&_cb=' + cb, true);
             xhrW.onerror = function() { generateSimulatedWeather(); }; xhrW.ontimeout = function() { generateSimulatedWeather(); };
             xhrW.onreadystatechange = function() {
                 if (xhrW.readyState === 4 && xhrW.status === 200) {
                     try {
-                        var data = JSON.parse(xhrW.responseText); var hr = new Date().getHours();
-                        if(data.hourly) {
-                            document.getElementById('weather-val').innerText = Math.round(data.hourly.temperature_2m[hr]);
-                            globalHum = data.hourly.relative_humidity_2m[hr] + '%'; // 🌟 ĐÃ VÁ LỖI CÚ PHÁP: Sửa d.hourly thành data.hourly chống crash sạch sẽ
-                            globalRain = (data.hourly.precipitation_probability[hr] != null ? data.hourly.precipitation_probability[hr] : 0) + '%';
-                            globalUV = data.hourly.uv_index[hr] != null ? data.hourly.uv_index[hr].toFixed(1) : "0.5";
+                        var d = JSON.parse(xhrW.responseText); var hr = new Date().getHours();
+                        if(d.hourly) {
+                            document.getElementById('weather-val').innerText = Math.round(d.hourly.temperature_2m[hr]);
+                            globalHum = d.hourly.relative_humidity_2m[hr] + '%'; 
+                            globalRain = (d.hourly.precipitation_probability[hr] != null ? d.hourly.precipitation_probability[hr] : 0) + '%';
+                            globalUV = d.hourly.uv_index[hr] != null ? d.hourly.uv_index[hr].toFixed(1) : "0.5";
                         }
-                        if(data.daily && data.daily.sunrise) { globalSunrise = data.daily.sunrise[0].substring(11, 16); globalSunset = data.daily.sunset[0].substring(11, 16); }
+                        if(d.daily && d.daily.sunrise) { globalSunrise = d.daily.sunrise[0].substring(11, 16); globalSunset = d.daily.sunset[0].substring(11, 16); }
                         rotateWeatherDisplay();
                     } catch(e) { generateSimulatedWeather(); }
                 }
@@ -521,13 +590,14 @@
 
             var xhrA = new XMLHttpRequest(); xhrA.timeout = 8000;
             xhrA.open('GET', 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + lat.toFixed(4) + '&longitude=' + lon.toFixed(4) + '&hourly=us_aqi,pm2_5&timezone=Asia%2FHo_Chi_Minh&forecast_days=1&_cb=' + cb, true);
+            xhrA.onerror = function() { rotateWeatherDisplay(); }; xhrA.ontimeout = function() { rotateWeatherDisplay(); };
             xhrA.onreadystatechange = function() {
                 if (xhrA.readyState === 4 && xhrA.status === 200) {
                     try {
                         var d = JSON.parse(xhrA.responseText); var hr = new Date().getHours();
                         if(d.hourly && d.hourly.us_aqi && d.hourly.us_aqi[hr] != null) { globalAQI = Math.round(d.hourly.us_aqi[hr]); } 
                         else if (d.hourly && d.hourly.pm2_5 && d.hourly.pm2_5[hr] != null) {
-                            var pm = d.hourly.pm2_5[hr]; if (pm <= 12.0) globalAQI = Math.round((50/12.0)*pm); else if (pm <= 35.4) globalAQI = Math.round(((49)/(23.4))*(pm-12.1)+51); else globalAQI = Math.round(pm + 100);
+                            var pm = d.hourly.pm2_5[hr]; if (pm <= 12.0) globalAQI = Math.round((50/12.0)*pm); else if (pm <= 35.4) globalAQI = Math.round(((49)/(23.4))*(pm-12.1)+51); else if (pm <= 55.4) globalAQI = Math.round(((49)/(20.0))*(pm-35.5)+101); else globalAQI = Math.round(pm + 100);
                         }
                         rotateWeatherDisplay();
                     } catch(e) {}
@@ -537,15 +607,19 @@
         setInterval(updateWeatherAndAQI, 3600000); 
 
         function updateDynamicContentBySlide() {
+            if (isSystemError) return; // Khoá cập nhật danh ngôn nếu đang hiện thông báo lỗi đỏ
             var now = new Date(); var currentSolarMonth = now.getMonth() + 1; var sDay = now.getDate();
             var checkTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0); var activePhase = phases[0];
             for (var i = 0; i < phases.length; i++) { var d = new Date(phases[i][0], phases[i][1], phases[i][2], 0, 0, 0); if (checkTime >= d) activePhase = phases[i]; else break; }
             var currentLunarMonth = (activePhase[1] === 0 ? 12 : activePhase[1]); var lDay = Math.floor((checkTime - new Date(activePhase[0], activePhase[1], activePhase[2], 0, 0, 0)) / (1000 * 60 * 60 * 24)) + 1;
+            
             rotateWeatherDisplay();
+
             var activeSpecialties = []; for (var s=0; s<specialtiesData.length; s++) { if(specialtiesData[s].m === currentSolarMonth || specialtiesData[s].m === 0) activeSpecialties.push(specialtiesData[s].text); }
             var finalQuote = ""; var dice = Math.random(); 
             if (dice < 0.5 && activeSpecialties.length > 0) { finalQuote = "Mùa này " + activeSpecialties[Math.floor(Math.random() * activeSpecialties.length)]; } 
             else if (quotePool.length > 0) { finalQuote = quotePool[Math.floor(Math.random() * quotePool.length)]; } else { finalQuote = "Nhà là nơi bão dừng sau cánh cửa, nơi bình yên ấm áp nhất để trở về."; }
+            
             var nextActiveFestivalText = ""; var minDiff = 365;
             for(var f=0; f<festivalsData.length; f++) {
                 var fest = festivalsData[f];
@@ -563,39 +637,59 @@
             }, 50);
         }
 
+        /* 🌟 THUẬT TOÁN TẢI ẢNH DRIVE & BÁO LỖI VÀNG/ĐỎ */
         function syncDriveData() {
             var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
             var url = 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)';
             var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
-            xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { var data = JSON.parse(xhr.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } } }; xhr.send();
+            xhr.onreadystatechange = function() { 
+                if (xhr.readyState === 4 && xhr.status === 200) { 
+                    var data = JSON.parse(xhr.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } 
+                } 
+            }; xhr.send();
 
             var imgQuery = encodeURIComponent("'" + FOLDER_ID + "' in parents and mimeType contains 'image/'");
             var imgUrl = 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime%20desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)';
             var xhrDrive = new XMLHttpRequest(); xhrDrive.open('GET', imgUrl, true);
             xhrDrive.onreadystatechange = function() {
-                if (xhrDrive.readyState === 4 && xhrDrive.status === 200) {
-                    var data = JSON.parse(xhrDrive.responseText);
-                    if (data.files && data.files.length > 0) {
-                        var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-                        for (var i = 0; i < data.files.length; i++) { 
-                            var imgPath = 'https://drive.google.com/thumbnail?id=' + data.files[i].id + '&sz=w2048'; allImgs.push(imgPath);
-                            if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
-                        }
-                        function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
-                        if (recentImgs.length > 0) { images = [].concat(shuffle(recentImgs), shuffle(allImgs)); } else { images = shuffle(allImgs); }
-                        currentIndex = 0; initSlideshow();
-                    } else { fallbackInit("Thư mục ảnh trống!"); }
+                if (xhrDrive.readyState === 4) {
+                    if (xhrDrive.status === 200) {
+                        var data = JSON.parse(xhrDrive.responseText);
+                        if (data.files && data.files.length > 0) {
+                            var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+                            for (var i = 0; i < data.files.length; i++) { 
+                                var imgPath = 'https://drive.google.com/thumbnail?id=' + data.files[i].id + '&sz=w2048'; allImgs.push(imgPath);
+                                if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
+                            }
+                            function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
+                            if (recentImgs.length > 0) { images = [].concat(shuffle(recentImgs), shuffle(allImgs)); } else { images = shuffle(allImgs); }
+                            currentIndex = 0; initSlideshow();
+                        } else { fallbackInit("Thư mục của khách không có ảnh nào!"); }
+                    } else if (xhrDrive.status === 403) {
+                        fallbackInit("LỖI 403: Mã API Key của bạn chưa được cấp quyền cho tên miền khunganhso.github.io");
+                    } else if (xhrDrive.status === 404) {
+                        fallbackInit("LỖI 404: Không tìm thấy thư mục. Thư mục này tạo quá cũ (bị khóa) hoặc sai ID.");
+                    } else {
+                        fallbackInit("Lỗi API Google Drive (Mã lỗi: " + xhrDrive.status + ").");
+                    }
                 }
             }; xhrDrive.send();
         }
 
-        function fallbackInit(msg) { document.getElementById('quote-row').innerText = msg; images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048&auto=format&fit=crop']; initSlideshow(); }
+        // 🌟 HÀM BÁO LỖI IN CHỮ ĐỎ TRỰC TIẾP LÊN MÀN HÌNH
+        function fallbackInit(msg) { 
+            isSystemError = true; // Khóa cập nhật text
+            document.getElementById('quote-row').innerHTML = '<span style="color:#FF3366; font-weight:700;">' + msg + '</span>'; 
+            images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048']; 
+            initSlideshow(); 
+        }
+
         function updateImageDisplayMechanism(img, gp) { img.classList.remove('fit-cover', 'fit-contain'); gp.classList.add('show-blur'); if (window.innerWidth > window.innerHeight) { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-cover' : 'fit-contain'); } else { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-contain' : 'fit-cover'); } }
         
         function loadAndDisplayImage(imgUrl, groupID, bgID, fgID) {
             var currentGroup = document.getElementById(isGroup1Active ? 'group1' : 'group2'); var nextGroup = document.getElementById(groupID); var nextBg = document.getElementById(bgID); var nextFg = document.getElementById(fgID);
             nextFg.onload = function() { updateImageDisplayMechanism(nextFg, nextGroup); currentGroup.classList.remove('active'); nextGroup.classList.add('active'); isGroup1Active = !isGroup1Active; currentIndex = (currentIndex + 1) % images.length; updateDynamicContentBySlide(); };
-            nextFg.onerror = function() { if (imgUrl.indexOf('unsplash.com') === -1) { fallbackInit("Mạng chập chờn..."); } };
+            nextFg.onerror = function() { if (imgUrl.indexOf('unsplash.com') === -1) { fallbackInit("Đang lấy lại ảnh dự phòng..."); } };
             nextBg.src = imgUrl; nextFg.src = imgUrl;
         }
 
@@ -603,6 +697,7 @@
         function goToNextSlide() { if(images.length <= 1) return; var nextIndex = (currentIndex + 1) % images.length; loadAndDisplayImage(images[nextIndex], isGroup1Active ? 'group2' : 'group1', isGroup1Active ? 'bg2' : 'bg1', isGroup1Active ? 'fg2' : 'fg1'); }
         function changeIntervalMode(modeVal) { currentIntervalIdx = modeVal - 1; var seconds = stepSeconds[currentIntervalIdx]; if (slideInterval) clearInterval(slideInterval); slideInterval = setInterval(goToNextSlide, seconds * 1000); }
 
+        // Khởi động
         updateClock(); updateWeatherAndAQI(); syncDriveData();
     </script>
 </body>
