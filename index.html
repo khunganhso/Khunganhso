@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="referrer" content="no-referrer">
     
-    <title>Khung Ảnh Số Thông Minh - V105 Debug Engine</title>
+    <title>Khung Ảnh Số Thông Minh - V106 Direct API</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
         #date-lunar-top { font-size: 1.4rem; font-weight: 700; color: #ffffff; margin-top: 4px; white-space: nowrap; text-align: center; }
         .highlight-yellow { color: #F4B41A; font-weight: 700; }
 
-        /* CỘT PHẢI TRÊN */
+        /* CỘT PHẢI TRÊN (NHIỆT ĐỘ CĂN GIỮA THỜI TIẾT TĨNH) */
         #top-right-wrapper { position: absolute; top: 35px; right: 45px; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 8px; text-shadow: 0px 2px 5px rgba(0,0,0,0.6); transition: transform 2s ease-in-out; }
         #temp-wrapper { position: relative; display: inline-flex; align-items: flex-start; justify-content: center; margin-right: 15px; } 
         #weather-val { font-family: 'Montserrat', sans-serif; font-weight: 700; color: #ffffff; letter-spacing: -2px; line-height: 0.8; font-size: 3.8rem; display: inline-block; }
@@ -149,7 +149,7 @@
         <div id="bottom-container">
             <div id="bottom-left-events" class="tap-target" ontouchstart="handleAction(event, 'show_birth')" onclick="handleAction(event, 'show_birth')"></div>
             <div id="bottom-right-text" class="tap-target" ontouchstart="handleAction(event, 'show_death')" onclick="handleAction(event, 'show_death')">
-                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/4] Đang khởi động hệ thống V105...</span>
+                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/4] Đang khởi động hệ thống V106...</span>
             </div>
         </div>
         
@@ -213,7 +213,11 @@
         var birthdays = [], anniversaries = [], festivalsData = [], specialtiesData = [], quotePool = [];
 
         var phases = [
-            [2025, 11, 20, 11, "Ất Tỵ"], [2026, 0, 19, 12, "Ất Tỵ"], [2026, 1, 17, 1, "Bính Ngọ"], [2026, 2, 19, 2, "Bính Ngọ"], [2026, 3, 17, 3, "Bính Ngọ"], [2026, 4, 16, 4, "Bính Ngọ"], [2026, 5, 15, 5, "Bính Ngọ"], [2026, 6, 14, 6, "Bính Ngọ"], [2026, 7, 13, 7, "Bính Ngọ"], [2026, 8, 11, 8, "Bính Ngọ"], [2026, 9, 11, 9, "Bính Ngọ"], [2026, 10, 10, 10, "Bính Ngọ"], [2026, 11, 9, 11, "Bính Ngọ"], [2027, 0, 8, 12, "Bính Ngọ"], [2027, 1, 6, 1, "Đinh Mùi"], [2027, 2, 8, 2, "Đinh Mùi"], [2027, 3, 7, 3, "Đinh Mùi"], [2027, 4, 6, 4, "Đinh Mùi"], [2027, 5, 5, 5, "Đinh Mùi"], [2027, 6, 4, 6, "Đinh Mùi"], [2027, 7, 2, 7, "Đinh Mùi"], [2027, 7, 31, 7, "Đinh Mùi"], [2027, 8, 29, 8, "Đinh Mùi"], [2027, 9, 29, 9, "Đinh Mùi"], [2027, 10, 28, 10, "Đinh Mùi"], [2027, 11, 27, 11, "Đinh Mùi"], [2028, 0, 26, 12, "Đinh Mùi"], [2028, 1, 26, 1, "Mậu Thân"], [2028, 2, 25, 2, "Mậu Thân"], [2028, 3, 26, 3, "Mậu Thân"], [2028, 4, 25, 4, "Mậu Thân"], [2028, 5, 24, 5, "Mậu Thân"], [2028, 6, 23, 5, "Mậu Thân"], [2028, 7, 22, 6, "Mậu Thân"], [2028, 8, 20, 7, "Mậu Thân"], [2028, 9, 19, 8, "Mậu Thân"], [2028, 10, 18, 9, "Mậu Thân"], [2028, 11, 17, 10, "Mậu Thân"], [2029, 0, 16, 11, "Mậu Thân"], [2029, 1, 15, 12, "Mậu Thân"], [2029, 2, 13, 1, "Kỷ Dậu"], [2029, 3, 15, 2, "Kỷ Dậu"], [2029, 4, 13, 3, "Kỷ Dậu"], [2029, 5, 13, 4, "Kỷ Dậu"], [2029, 6, 11, 5, "Kỷ Dậu"], [2029, 7, 11, 6, "Kỷ Dậu"], [2029, 8, 10, 7, "Kỷ Dậu"], [2029, 9, 8, 8, "Kỷ Dậu"], [2029, 10, 8, 9, "Kỷ Dậu"], [2029, 11, 7, 10, "Kỷ Dậu"], [2030, 0, 6, 11, "Kỷ Dậu"], [2030, 1, 5, 12, "Kỷ Dậu"], [2030, 2, 3, 1, "Canh Tuất"], [2030, 3, 5, 2, "Canh Tuất"], [2030, 4, 3, 3, "Canh Tuất"], [2030, 5, 2, 4, "Canh Tuất"], [2030, 6, 1, 5, "Canh Tuất"], [2030, 6, 30, 6, "Canh Tuất"], [2030, 7, 30, 7, "Canh Tuất"], [2030, 8, 29, 8, "Canh Tuất"], [2030, 9, 27, 9, "Canh Tuất"], [2030, 10, 27, 10, "Canh Tuất"], [2030, 11, 26, 11, "Canh Tuất"]
+            [2025, 11, 20, 11, "Ất Tỵ"], [2026, 0, 19, 12, "Ất Tỵ"], [2026, 1, 17, 1, "Bính Ngọ"], [2026, 2, 19, 2, "Bính Ngọ"], [2026, 3, 17, 3, "Bính Ngọ"], [2026, 4, 16, 4, "Bính Ngọ"], [2026, 5, 15, 5, "Bính Ngọ"], [2026, 6, 14, 6, "Bính Ngọ"], [2026, 7, 13, 7, "Bính Ngọ"], [2026, 8, 11, 8, "Bính Ngọ"], [2026, 9, 11, 9, "Bính Ngọ"], [2026, 10, 10, 10, "Bính Ngọ"], [2026, 11, 9, 11, "Bính Ngọ"],
+            [2027, 0, 8, 12, "Bính Ngọ"], [2027, 1, 6, 1, "Đinh Mùi"], [2027, 2, 8, 2, "Đinh Mùi"], [2027, 3, 7, 3, "Đinh Mùi"], [2027, 4, 6, 4, "Đinh Mùi"], [2027, 5, 5, 5, "Đinh Mùi"], [2027, 6, 4, 6, "Đinh Mùi"], [2027, 7, 2, 7, "Đinh Mùi"], [2027, 7, 31, 7, "Đinh Mùi"], [2027, 8, 29, 8, "Đinh Mùi"], [2027, 9, 29, 9, "Đinh Mùi"], [2027, 10, 28, 10, "Đinh Mùi"], [2027, 11, 27, 11, "Đinh Mùi"],
+            [2028, 0, 26, 12, "Đinh Mùi"], [2028, 1, 26, 1, "Mậu Thân"], [2028, 2, 25, 2, "Mậu Thân"], [2028, 3, 26, 3, "Mậu Thân"], [2028, 4, 25, 4, "Mậu Thân"], [2028, 5, 24, 5, "Mậu Thân"], [2028, 6, 23, 5, "Mậu Thân"], [2028, 7, 22, 6, "Mậu Thân"], [2028, 8, 20, 7, "Mậu Thân"], [2028, 9, 19, 8, "Mậu Thân"], [2028, 10, 18, 9, "Mậu Thân"], [2028, 11, 17, 10, "Mậu Thân"],
+            [2029, 0, 16, 11, "Mậu Thân"], [2029, 1, 15, 12, "Mậu Thân"], [2029, 2, 13, 1, "Kỷ Dậu"], [2029, 3, 15, 2, "Kỷ Dậu"], [2029, 4, 13, 3, "Kỷ Dậu"], [2029, 5, 13, 4, "Kỷ Dậu"], [2029, 6, 11, 5, "Kỷ Dậu"], [2029, 7, 11, 6, "Kỷ Dậu"], [2029, 8, 10, 7, "Kỷ Dậu"], [2029, 9, 8, 8, "Kỷ Dậu"], [2029, 10, 8, 9, "Kỷ Dậu"], [2029, 11, 7, 10, "Kỷ Dậu"],
+            [2030, 0, 6, 11, "Kỷ Dậu"], [2030, 1, 5, 12, "Kỷ Dậu"], [2030, 2, 3, 1, "Canh Tuất"], [2030, 3, 5, 2, "Canh Tuất"], [2030, 4, 3, 3, "Canh Tuất"], [2030, 5, 2, 4, "Canh Tuất"], [2030, 6, 1, 5, "Canh Tuất"], [2030, 6, 30, 6, "Canh Tuất"], [2030, 7, 30, 7, "Canh Tuất"], [2030, 8, 29, 8, "Canh Tuất"], [2030, 9, 27, 9, "Canh Tuất"], [2030, 10, 27, 10, "Canh Tuất"], [2030, 11, 26, 11, "Canh Tuất"]
         ];
 
         function getEnvColor(type, val) {
@@ -248,15 +252,31 @@
         }
         setInterval(rotateWeatherDisplay, 120000);
 
-        // HÀM BÁO LỖI IN CHỮ ĐỎ VĨNH VIỄN TRÊN MÀN HÌNH
         function fallbackInit(msg) { 
             isSystemError = true; 
             document.getElementById('quote-row').innerHTML = '<span style="color:#FF3366; font-weight:700; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px;">' + msg + '</span>'; 
             images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048']; 
-            initSlideshow(); 
+            
+            // Start failsafe slideshow directly to avoid infinite loading
+            var currentGroupId = isGroup1Active ? 'group1' : 'group2';
+            var nextGroupId = isGroup1Active ? 'group2' : 'group1';
+            var nextBgId = isGroup1Active ? 'bg2' : 'bg1';
+            var nextFgId = isGroup1Active ? 'fg2' : 'fg1';
+            
+            var nextBg = document.getElementById(nextBgId);
+            var nextFg = document.getElementById(nextFgId);
+            nextFg.onload = function() {
+                var currentGroup = document.getElementById(currentGroupId);
+                var nextGroup = document.getElementById(nextGroupId);
+                updateImageDisplayMechanism(nextFg, nextGroup); 
+                currentGroup.classList.remove('active'); 
+                nextGroup.classList.add('active'); 
+                isGroup1Active = !isGroup1Active; 
+            };
+            nextBg.src = images[0]; nextFg.src = images[0];
         }
 
-        /* 🌟 THUẬT TOÁN TẢI FILE CHỐNG CHẶN CROSS-SITE CỦA SAFARI VÀ THEO DÕI DEBUG TỪNG BƯỚC */
+        /* 🌟 THUẬT TOÁN TẢI FILE TRỰC TIẾP TỪ GOOGLE API (CHỐNG CORS / ITP CỦA TRÌNH DUYỆT) */
         function syncDriveData() {
             writeDebug("[2/4] Đang quét cấu hình Lịch...");
             var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
@@ -278,18 +298,20 @@
                     if (xhrDrive.status === 200) {
                         var data = JSON.parse(xhrDrive.responseText);
                         if (data.files && data.files.length > 0) {
-                            writeDebug("[4/4] Đã tìm thấy " + data.files.length + " ảnh. Đang sắp xếp...");
+                            writeDebug("[4/4] Đã tìm thấy " + data.files.length + " ảnh. Đang thiết lập luồng nạp...");
                             var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
                             for (var i = 0; i < data.files.length; i++) { 
-                                // 🌟 SỬA ĐỔI QUAN TRỌNG: DÙNG API TRỰC TIẾP export=view THAY VÌ thumbnail ĐỂ VƯỢT TƯỜNG LỬA SAFARI ITP
-                                var imgPath = 'https://drive.google.com/uc?export=view&id=' + data.files[i].id; 
+                                // 🌟 SỬA ĐỔI QUAN TRỌNG: DÙNG ĐƯỜNG DẪN DOWNLOAD NGUYÊN BẢN CỦA API ĐỂ TRÁNH BỊ CHẶN CROSS-SITE
+                                var imgPath = 'https://www.googleapis.com/drive/v3/files/' + data.files[i].id + '?alt=media&key=' + API_KEY; 
                                 allImgs.push(imgPath);
                                 if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
                             }
                             function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
                             if (recentImgs.length > 0) { images = [].concat(shuffle(recentImgs), shuffle(allImgs)); } else { images = shuffle(allImgs); }
                             
-                            currentIndex = 0; initSlideshow();
+                            currentIndex = 0; 
+                            // Tạm nghỉ 500ms để UI kịp render trước khi gọi init
+                            setTimeout(initSlideshow, 500);
                         } else { fallbackInit("LỖI: Thư mục không có ảnh nào. Vui lòng tải ảnh lên!"); }
                     } else if (xhrDrive.status === 403) {
                         fallbackInit("LỖI 403: Cài đặt API Key chưa cho phép tên miền khunganhso.github.io chạy.");
@@ -300,7 +322,7 @@
                     }
                 }
             }; 
-            try { xhrDrive.send(); } catch(err) { fallbackInit("Lỗi bảo mật Safari: Không thể gọi máy chủ Google!"); }
+            try { xhrDrive.send(); } catch(err) { fallbackInit("Lỗi bảo mật trình duyệt: Không thể gọi máy chủ Google!"); }
         }
 
         function downloadConfigFile(fileId) {
@@ -334,7 +356,8 @@
                 else if (section === "[KHO DANH NGON CUOC LIFE]" || section === "[KHO DANH NGON CUOC SONG]") { tempQ.push(line); }
             }
             if(tempB.length>0) birthdays = tempB; if(tempA.length>0) anniversaries = tempA; if(tempF.length>0) festivalsData = tempF; if(tempS.length>0) specialtiesData = tempS; if(tempQ.length>0) quotePool = tempQ;
-            updateWeatherAndAQI(); updateClock(); updateDynamicContentBySlide(); checkForBirthdayMusic('load');
+            updateWeatherAndAQI(); updateClock(); 
+            // Không gọi updateDynamicContentBySlide ở đây nữa, nhường cho lúc load xong ảnh đầu tiên
         }
 
         function showToast(msg) { var toast = document.getElementById('toast-msg'); toast.innerText = msg; toast.classList.add('show'); if(toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(function() { toast.classList.remove('show'); }, 3000); }
@@ -470,16 +493,32 @@
 
         function updateImageDisplayMechanism(img, gp) { img.classList.remove('fit-cover', 'fit-contain'); gp.classList.add('show-blur'); if (window.innerWidth > window.innerHeight) { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-cover' : 'fit-contain'); } else { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-contain' : 'fit-cover'); } }
         
-        function loadAndDisplayImage(imgUrl, groupID, bgID, fgID) {
-            writeDebug("[5/5] Đang nạp ảnh số " + (currentIndex + 1) + "...");
-            var currentGroup = document.getElementById(isGroup1Active ? 'group1' : 'group2'); var nextGroup = document.getElementById(groupID); var nextBg = document.getElementById(bgID); var nextFg = document.getElementById(fgID);
-            nextFg.onload = function() { updateImageDisplayMechanism(nextFg, nextGroup); currentGroup.classList.remove('active'); nextGroup.classList.add('active'); isGroup1Active = !isGroup1Active; currentIndex = (currentIndex + 1) % images.length; updateDynamicContentBySlide(); };
-            nextFg.onerror = function() { writeDebug("Mạng chập chờn, đang thử lại...", "#F4B41A"); setTimeout(goToNextSlide, 3000); };
+        function loadAndDisplayImage(imgUrl) {
+            writeDebug("[5/5] Đang kết xuất ảnh " + (currentIndex + 1) + "/" + images.length + "...", "#F4B41A");
+            var currentGroupId = isGroup1Active ? 'group1' : 'group2'; var nextGroupId = isGroup1Active ? 'group2' : 'group1';
+            var nextBgId = isGroup1Active ? 'bg2' : 'bg1'; var nextFgId = isGroup1Active ? 'fg2' : 'fg1';
+            
+            var currentGroup = document.getElementById(currentGroupId); var nextGroup = document.getElementById(nextGroupId);
+            var nextBg = document.getElementById(nextBgId); var nextFg = document.getElementById(nextFgId);
+            
+            nextFg.onload = function() { 
+                updateImageDisplayMechanism(nextFg, nextGroup); 
+                currentGroup.classList.remove('active'); nextGroup.classList.add('active'); 
+                isGroup1Active = !isGroup1Active; 
+                currentIndex = (currentIndex + 1) % images.length; 
+                isSystemError = false; // Xoá log debug khi ảnh nạp thành công
+                updateDynamicContentBySlide(); 
+            };
+            nextFg.onerror = function() { 
+                writeDebug("Mạng chậm hoặc ảnh lỗi, đang thử ảnh tiếp theo...", "#FF3366"); 
+                currentIndex = (currentIndex + 1) % images.length;
+                setTimeout(goToNextSlide, 3000); 
+            };
             nextBg.src = imgUrl; nextFg.src = imgUrl;
         }
 
-        function initSlideshow() { applyClockStyle(); updateClock(); updateWeatherAndAQI(); loadAndDisplayImage(images[0], isGroup1Active ? 'group1' : 'group2', isGroup1Active ? 'bg1' : 'bg2', isGroup1Active ? 'fg1' : 'fg2'); changeIntervalMode(currentIntervalIdx + 1); }
-        function goToNextSlide() { if(images.length <= 1) return; var nextIndex = (currentIndex + 1) % images.length; loadAndDisplayImage(images[nextIndex], isGroup1Active ? 'group2' : 'group1', isGroup1Active ? 'bg2' : 'bg1', isGroup1Active ? 'fg2' : 'fg1'); }
+        function initSlideshow() { applyClockStyle(); updateClock(); updateWeatherAndAQI(); loadAndDisplayImage(images[0]); changeIntervalMode(currentIntervalIdx + 1); }
+        function goToNextSlide() { if(images.length <= 1) return; loadAndDisplayImage(images[currentIndex]); }
         function changeIntervalMode(modeVal) { currentIntervalIdx = modeVal - 1; var seconds = stepSeconds[currentIntervalIdx]; if (slideInterval) clearInterval(slideInterval); slideInterval = setInterval(goToNextSlide, seconds * 1000); }
 
         // Khởi động
