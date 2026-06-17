@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="referrer" content="no-referrer">
     
-    <title>Khung Ảnh Số Thông Minh - SaaS Enterprise</title>
+    <title>Khung Ảnh Số SaaS V110</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
         #date-lunar-top { font-size: 1.4rem; font-weight: 700; color: #ffffff; margin-top: 4px; white-space: nowrap; text-align: center; }
         .highlight-yellow { color: #F4B41A; font-weight: 700; }
 
-        /* CỘT PHẢI TRÊN (NHIỆT ĐỘ TRÊN - THỜI TIẾT DƯỚI CĂN GIỮA TRỤC TÂM) */
+        /* CỘT PHẢI TRÊN */
         #top-right-wrapper { position: absolute; top: 35px; right: 45px; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 8px; text-shadow: 0px 2px 5px rgba(0,0,0,0.6); transition: transform 2s ease-in-out; }
         #temp-wrapper { position: relative; display: inline-flex; align-items: flex-start; justify-content: center; margin-right: 15px; } 
         #weather-val { font-family: 'Montserrat', sans-serif; font-weight: 700; color: #ffffff; letter-spacing: -2px; line-height: 0.8; font-size: 3.8rem; display: inline-block; }
@@ -152,15 +152,15 @@
         <div id="bottom-container">
             <div id="bottom-left-events" class="tap-target" ontouchstart="handleAction(event, 'show_birth')" onclick="handleAction(event, 'show_birth')"></div>
             <div id="bottom-right-text" class="tap-target" ontouchstart="handleAction(event, 'show_death')" onclick="handleAction(event, 'show_death')">
-                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/5] Khởi động động cơ SaaS V109 thành công...</span>
+                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/5] Khởi động hệ thống kết nối V110...</span>
             </div>
         </div>
         
         <div id="location-modal" class="modal-base">
             <div class="modal-title">CÀI ĐẶT VỊ TRÍ</div>
-            <input type="text" id="loc-name" class="loc-input" placeholder="Tên địa phương (VD: Tân Lập)">
-            <input type="text" inputmode="decimal" id="loc-lat" class="loc-input" placeholder="Vĩ độ (Chấm hoặc phẩy đều được)">
-            <input type="text" inputmode="decimal" id="loc-lon" class="loc-input" placeholder="Kinh độ (VD: 108.0694)">
+            <input type="text" id="loc-name" class="loc-input" placeholder="Tên địa phương">
+            <input type="text" inputmode="decimal" id="loc-lat" class="loc-input" placeholder="Vĩ độ">
+            <input type="text" inputmode="decimal" id="loc-lon" class="loc-input" placeholder="Kinh độ">
             <div class="loc-btns">
                 <button class="loc-btn btn-save" ontouchstart="saveLocation(); event.preventDefault();" onclick="saveLocation()">LƯU</button>
                 <button class="loc-btn btn-default" ontouchstart="defaultLocation(); event.preventDefault();" onclick="defaultLocation()">MẶC ĐỊNH</button>
@@ -176,15 +176,20 @@
     </div>
 
     <script>
-        // =========================================================================
-        // 🔥 CƠ SỞ DỮ LIỆU KHÁCH HÀNG SAAS (MÃ HÓA TOÀN DIỆN - KHÔNG SỢ LỘC ID DRIVE)
-        // =========================================================================
-        const FOLDER_MAP = {
-            "khach01": "17YOn0tWO8-hzloHM57bLhRh7e9LALZZk", // Thư mục drive mới của khách 1 bạn cấp
-            "khach02": "MÃ_DRIVE_KHÁCH_HÀNG_TIẾP_THEO_NẾU_CÓ",
-            "khach03": "MÃ_DRIVE_KHÁCH_HÀNG_TIẾP_THEO_NẾU_CÓ"
+        // =========================================================================================
+        // 🏢 HỆ THỐNG QUẢN LÝ KHÁCH HÀNG SAAS (MÃ HÓA ID BẢO MẬT TUYỆT ĐỐI)
+        // Khi có khách mới, chỉ cần thêm 1 dòng vào đây.
+        // Khách hàng xem qua link ẩn mã: https://khunganhso.github.io/Khunganhso/?c=khach01
+        // =========================================================================================
+        var DANH_SACH_KHACH_HANG = {
+            "khach01": "17YOn0tWO8-hzloHM57bLhRh7e9LALZZk", // Khách hàng 01 hiện tại của bạn
+            "khach02": "NHAP_ID_THU_MUC_KHACH_2_VAO_DAY",     // Dành cho khách số 2
+            "khach03": "NHAP_ID_THU_MUC_KHACH_3_VAO_DAY"      // Dành cho khách số 3
         };
-        // =========================================================================
+        // =========================================================================================
+
+        // 🔥 Vá lỗi Fatal Crash (Cốt lõi khiến hệ thống bị treo)
+        var bX1 = 0, bY1 = 0, bX2 = 0, bY2 = 0, bX3 = 0, bY3 = 0;
 
         function getQueryParam(param) {
             var search = window.location.search.substring(1); if (!search) return null;
@@ -195,11 +200,13 @@
 
         function writeDebug(msg, color) {
             if (isSystemError) return;
-            document.getElementById('quote-row').innerHTML = '<span style="color:' + (color || '#00E5FF') + '; font-weight:700;">' + msg + '</span>';
+            var el = document.getElementById('quote-row');
+            if (el) el.innerHTML = '<span style="color:' + (color || '#00E5FF') + '; font-weight:700;">' + msg + '</span>';
         }
 
-        var clientAlias = getQueryParam('c'); 
-        var FOLDER_ID = FOLDER_MAP[clientAlias] || '1r1WUIKwAPAnsyIh-Zot7AevEW0uEZ-Hl';
+        // Kích hoạt Mã Khách Hàng (Mặc định tự nạp khach01 nếu không gõ đuôi ?c= )
+        var clientAlias = getQueryParam('c') || 'khach01'; 
+        var FOLDER_ID = DANH_SACH_KHACH_HANG[clientAlias];
         
         var SECRET_ENCODED = 'QUl6YVN5REwyRm1VQzkxMUtBTnFwN3VPbnZKcU5xVHltb1R2SkxF'; 
         var API_KEY = getQueryParam('k') ? getQueryParam('k').trim() : atob(SECRET_ENCODED); 
@@ -258,6 +265,16 @@
         }
         setInterval(rotateWeatherDisplay, 120000);
 
+        function getEnvColor(type, val) {
+            var strVal = String(val).trim(); 
+            if (strVal === "--" || strVal.indexOf('--') !== -1) return "#ffffff";
+            var v = parseFloat(strVal);
+            if (type === 'aqi') { if (v <= 50) return "#ffffff"; if (v <= 100) return "#F4B41A"; if (v <= 150) return "#FF9500"; return "#FF3366"; }
+            if (type === 'uv') { if (v <= 2) return "#ffffff"; if (v <= 5) return "#F4B41A"; if (v <= 7) return "#FF9500"; return "#FF3366"; }
+            if (type === 'rain') { if (v < 51) return "#ffffff"; if (v <= 75) return "#F4B41A"; return "#FF3366"; }
+            return "#ffffff";
+        }
+
         function syncEnvWidth() {
             setTimeout(function() {
                 var tempVal = document.getElementById('weather-val'); var envItem = document.querySelector('.env-rotating-item');
@@ -274,9 +291,9 @@
 
         function fallbackInit(msg) { 
             isSystemError = true; 
-            document.getElementById('quote-row').innerHTML = '<span style="color:#FF3366; font-weight:700; background:rgba(0,0,0,0.6); padding:10px; border-radius:8px;">' + msg + '</span>'; 
+            var el = document.getElementById('quote-row');
+            if(el) el.innerHTML = '<span style="color:#FF3366; font-weight:700; background:rgba(0,0,0,0.8); padding:10px; border-radius:8px;">' + msg + '</span>'; 
             images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048']; 
-            
             var currentGroupId = isGroup1Active ? 'group1' : 'group2'; var nextGroupId = isGroup1Active ? 'group2' : 'group1';
             var nextBg = document.getElementById(isGroup1Active ? 'bg2' : 'bg1'); var nextFg = document.getElementById(isGroup1Active ? 'fg2' : 'fg1');
             nextFg.onload = function() {
@@ -286,42 +303,42 @@
             nextBg.src = images[0]; nextFg.src = images[0];
         }
 
-        /* 🌟 ĐỘNG CƠ XUYÊN TƯỜNG LỬA TRÌNH DUYỆT (DIRECT STREAM MEDIA) */
+        /* 🌟 THUẬT TOÁN KẾT NỐI API TRỰC TIẾP (DIRECT MEDIA BYPASS) */
         function syncDriveData() {
-            writeDebug("[2/5] Đang giải mã và đồng bộ Lịch...");
-            var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
-            var url = 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)';
-            var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
-            xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { var data = JSON.parse(xhr.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } } }; 
-            xhr.send();
+            writeDebug("[2/5] Kiểm tra Mã Khách Hàng...");
+            if (!FOLDER_ID) { fallbackInit("LỖI: Mã Khách Hàng (Alias) không tồn tại!"); return; }
 
-            writeDebug("[3/5] Đang kết nối máy chủ Google Drive...");
+            writeDebug("[3/5] Đang giải mã Lịch sự kiện...");
+            var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
+            var xhrConfig = new XMLHttpRequest(); xhrConfig.open('GET', 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)', true);
+            xhrConfig.onreadystatechange = function() { if (xhrConfig.readyState === 4 && xhrConfig.status === 200) { var data = JSON.parse(xhrConfig.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } } }; 
+            xhrConfig.send();
+
+            writeDebug("[4/5] Đang kết nối Kho Ảnh Drive...");
             var imgQuery = encodeURIComponent("'" + FOLDER_ID + "' in parents and mimeType contains 'image/'");
-            var imgUrl = 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime%20desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)';
-            var xhrDrive = new XMLHttpRequest(); xhrDrive.open('GET', imgUrl, true);
+            var xhrDrive = new XMLHttpRequest(); xhrDrive.open('GET', 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)', true);
             xhrDrive.onreadystatechange = function() {
                 if (xhrDrive.readyState === 4) {
                     if (xhrDrive.status === 200) {
                         var data = JSON.parse(xhrDrive.responseText);
                         if (data.files && data.files.length > 0) {
-                            writeDebug("[4/5] Tìm thấy " + data.files.length + " ảnh. Đang mở luồng tải...");
+                            writeDebug("[5/5] Hoàn tất! Đang nạp " + data.files.length + " bức ảnh...", "#2ecc71");
                             var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
                             for (var i = 0; i < data.files.length; i++) { 
-                                // 🌟 TUYỆT CHIÊU KINH DOANH: Kéo nhị phân gốc bằng API Key của bạn để vượt mọi rào cản Safari/Samsung
                                 var imgPath = 'https://www.googleapis.com/drive/v3/files/' + data.files[i].id + '?alt=media&key=' + API_KEY; 
                                 allImgs.push(imgPath);
                                 if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
                             }
                             function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
-                            if (recentImgs.length > 0) { images = [].concat(shuffle(recentImgs), shuffle(allImgs)); } else { images = shuffle(allImgs); }
+                            images = recentImgs.length > 0 ? shuffle(recentImgs).concat(shuffle(allImgs)) : shuffle(allImgs);
                             currentIndex = 0; setTimeout(initSlideshow, 500);
-                        } else { fallbackInit("LỖI: Thư mục Drive trống rỗng, hãy up ảnh lên!"); }
+                        } else { fallbackInit("LỖI: Khách hàng chưa tải ảnh lên Drive!"); }
                     } else if (xhrDrive.status === 403) {
-                        fallbackInit("LỖI 403: API Key chưa cho phép tên miền khunganhso.github.io hoạt động.");
+                        fallbackInit("LỖI 403: Cài đặt Google Cloud chưa cấp quyền cho tên miền.");
                     } else if (xhrDrive.status === 404) {
-                        fallbackInit("LỖI 404: Không tìm thấy ID thư mục Drive. Vui lòng kiểm tra lại quyền Share Viewer.");
+                        fallbackInit("LỖI 404: Không tìm thấy Drive. Hãy bật chế độ Bất kỳ ai có liên kết (Viewer).");
                     } else {
-                        fallbackInit("Lỗi máy chủ Google Drive (Mã: " + xhrDrive.status + ").");
+                        fallbackInit("Lỗi API Google (Mã: " + xhrDrive.status + ").");
                     }
                 }
             }; xhrDrive.send();
@@ -358,7 +375,6 @@
                 else if (section === "[KHO DANH NGON CUOC LIFE]" || section === "[KHO DANH NGON CUOC SONG]") { tempQ.push(line); }
             }
             if(tempB.length>0) birthdays = tempB; if(tempA.length>0) anniversaries = tempA; if(tempF.length>0) festivalsData = tempF; if(tempS.length>0) specialtiesData = tempS; if(tempQ.length>0) quotePool = tempQ;
-            updateWeatherAndAQI(); updateClock();
         }
 
         function showToast(msg) { var toast = document.getElementById('toast-msg'); toast.innerText = msg; toast.classList.add('show'); if(toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(function() { toast.classList.remove('show'); }, 3000); }
@@ -394,7 +410,7 @@
 
         function forceNextSlide() { goToNextSlide(); changeIntervalMode(currentIntervalIdx + 1); showToast("Đang đổi ảnh..."); }
 
-        function toggleNightMode() { var body = document.body; if (body.classList.contains('night-active')) { forceNightMode = false; body.classList.remove('night-active'); showToast("☀️ Chào ngày mới!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0)'; syncDriveData(); } else { forceNightMode = true; body.classList.add('night-active'); showToast("🌙 Chúc ngủ ngon!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0.5)'; } applyDynamicPositions(); }
+        function toggleNightMode() { var body = document.body; if (body.classList.contains('night-active')) { forceNightMode = false; body.classList.remove('night-active'); showToast("☀️ Chào ngày mới!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0)'; } else { forceNightMode = true; body.classList.add('night-active'); showToast("🌙 Chúc ngủ ngon!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0.5)'; } applyDynamicPositions(); }
         function triggerBorderBurnInProtection() { if (document.body.classList.contains('night-active')) return; var activeImg = document.querySelector('.slide-group.active .background-blur'); var outerBlur = document.getElementById('outer-blur-bg'); var whiteBorder = document.getElementById('white-border-bg'); if(activeImg && activeImg.src) { outerBlur.src = activeImg.src; whiteBorder.style.opacity = '0'; setTimeout(function() { whiteBorder.style.opacity = '1'; }, 1500); } }
         setInterval(triggerBorderBurnInProtection, 600000); 
         function runAntiBurnIn() { bX1 = Math.floor(Math.random() * 30) - 15; bY1 = Math.floor(Math.random() * 30) - 15; bX2 = Math.floor(Math.random() * 30) - 15; bY2 = Math.floor(Math.random() * 30) - 15; bX3 = Math.floor(Math.random() * 30) - 15; bY3 = Math.floor(Math.random() * 30) - 15; applyDynamicPositions(); }
@@ -423,7 +439,7 @@
 
         function updateClock() {
             var now = new Date(); var hours = now.getHours(); var minutes = now.getMinutes(); var seconds = now.getSeconds();
-            if (hours === wakeUpHour && minutes === 0 && seconds === 0) { forceNightMode = null; syncDriveData(); }
+            
             var hrStr = hours < 10 ? '0' + hours : hours; var minStr = minutes < 10 ? '0' + minutes : minutes;
             var hrNode = document.getElementById('hr-node'); var minNode = document.getElementById('min-node'); var nHrNode = document.getElementById('night-hr-node'); var nMinNode = document.getElementById('night-min-node');
             if(hrNode.innerText !== hrStr) hrNode.innerText = hrStr; if(minNode.innerText !== minStr) minNode.innerText = minStr;
@@ -495,7 +511,6 @@
         function updateImageDisplayMechanism(img, gp) { img.classList.remove('fit-cover', 'fit-contain'); gp.classList.add('show-blur'); if (window.innerWidth > window.innerHeight) { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-cover' : 'fit-contain'); } else { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-contain' : 'fit-cover'); } }
         
         function loadAndDisplayImage(imgUrl) {
-            writeDebug("[5/5] Thiết lập và kết xuất ảnh " + (currentIndex + 1) + "/" + images.length + "...", "#2ecc71");
             var currentGroupId = isGroup1Active ? 'group1' : 'group2'; var nextGroupId = isGroup1Active ? 'group2' : 'group1';
             var nextBgId = isGroup1Active ? 'bg2' : 'bg1'; var nextFgId = isGroup1Active ? 'fg2' : 'fg1';
             
@@ -510,57 +525,22 @@
                 updateDynamicContentBySlide(); 
             };
             nextFg.onerror = function() { 
-                writeDebug("Tín hiệu Drive chậm, tự động bỏ qua ảnh lỗi...", "#F4B41A"); 
+                writeDebug("Đường truyền yếu, bỏ qua ảnh " + (currentIndex + 1) + "...", "#F4B41A"); 
                 currentIndex = (currentIndex + 1) % images.length;
                 setTimeout(goToNextSlide, 2000); 
             };
             nextBg.src = imgUrl; nextFg.src = imgUrl;
         }
 
-        function initSlideshow() { applyClockStyle(); updateClock(); updateWeatherAndAQI(); loadAndDisplayImage(images[0]); changeIntervalMode(currentIntervalIdx + 1); }
+        function initSlideshow() { applyClockStyle(); loadAndDisplayImage(images[0]); changeIntervalMode(currentIntervalIdx + 1); }
         function goToNextSlide() { if(images.length <= 1) return; loadAndDisplayImage(images[currentIndex]); }
         function changeIntervalMode(modeVal) { currentIntervalIdx = modeVal - 1; var seconds = stepSeconds[currentIntervalIdx]; if (slideInterval) clearInterval(slideInterval); slideInterval = setInterval(goToNextSlide, seconds * 1000); }
 
-        function syncDriveData() {
-            writeDebug("[2/5] Đang quét tệp cấu hình Lịch...");
-            var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
-            var url = 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)';
-            var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
-            xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { var data = JSON.parse(xhr.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } } }; xhr.send();
+        // MÃ HÓA KHỞI ĐỘNG CHỐNG LỖI CỤC BỘ
+        try { updateClock(); } catch(e) { console.error(e); }
+        try { updateWeatherAndAQI(); } catch(e) { console.error(e); }
+        try { syncDriveData(); } catch(e) { fallbackInit("Crashed: " + e.message); }
 
-            writeDebug("[3/5] Đang phân tích máy chủ Google Drive...");
-            var imgQuery = encodeURIComponent("'" + FOLDER_ID + "' in parents and mimeType contains 'image/'");
-            var imgUrl = 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime%20desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)';
-            var xhrDrive = new XMLHttpRequest(); xhrDrive.open('GET', imgUrl, true);
-            xhrDrive.onreadystatechange = function() {
-                if (xhrDrive.readyState === 4) {
-                    if (xhrDrive.status === 200) {
-                        var data = JSON.parse(xhrDrive.responseText);
-                        if (data.files && data.files.length > 0) {
-                            writeDebug("[4/5] Kết nối kho ảnh thành công! Đang thiết lập luồng phát...");
-                            var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-                            for (var i = 0; i < data.files.length; i++) { 
-                                var imgPath = 'https://www.googleapis.com/drive/v3/files/' + data.files[i].id + '?alt=media&key=' + API_KEY; 
-                                allImgs.push(imgPath);
-                                if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
-                            }
-                            function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
-                            if (recentImgs.length > 0) { images = [].concat(shuffle(recentImgs), shuffle(allImgs)); } else { images = shuffle(allImgs); }
-                            currentIndex = 0; setTimeout(initSlideshow, 300);
-                        } else { fallbackInit("LỖI: Thư mục trống rỗng, hãy up ảnh JPG/PNG lên Drive!"); }
-                    } else if (xhrDrive.status === 403) {
-                        fallbackInit("LỖI 403: Google Cloud chặn quyền. Bạn chưa cấu hình Website restrictions.");
-                    } else if (xhrDrive.status === 404) {
-                        fallbackInit("LỖI 404: Không tìm thấy ID thư mục Drive này. Hãy share công khai Viewer.");
-                    } else {
-                        fallbackInit("Lỗi kết nối API Google Drive (Mã lỗi: " + xhrDrive.status + ").");
-                    }
-                }
-            }; xhrDrive.send();
-        }
-
-        // Khởi động
-        updateClock(); updateWeatherAndAQI(); syncDriveData();
     </script>
 </body>
 </html>
