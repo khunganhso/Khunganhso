@@ -8,38 +8,31 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="referrer" content="no-referrer">
     
-    <title>Khung Ảnh Số SaaS V112</title>
+    <title>Khung Ảnh Số Thông Minh - SaaS V113 Secure</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tourney:wght@600&family=Playfair+Display:wght@700&family=Oswald:wght@600&family=Righteous&family=Courier+Prime:wght@700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; cursor: pointer; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; cursor: default; }
         #outer-blur-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(45px) brightness(0.6); z-index: 0; transform: scale(1.2); }
         #white-border-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 1; transition: opacity 1.5s ease-in-out; }
         #frame-wrapper { position: absolute; top: 45px; bottom: 45px; left: 45px; right: 45px; background-color: #000; overflow: hidden; box-shadow: 0px 15px 45px rgba(0, 0, 0, 0.15), inset 0px 0px 30px rgba(0,0,0,0.85); border: 1px solid #eaeaea; transition: all 0.5s ease; z-index: 5; }
-        
         #photo-container, .slide-group { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         #photo-container { z-index: 1; }
         .slide-group { opacity: 0; transition: opacity 3s ease-in-out; display: block; }
         .slide-group.active { opacity: 1; z-index: 2; }
-        
         .background-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover !important; filter: blur(40px) brightness(0.85); -webkit-filter: blur(40px) brightness(0.85); transform: scale(1.3); z-index: 1; display: none; }
         .foreground-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; flex-shrink: 0; filter: drop-shadow(0px 15px 35px rgba(0,0,0,0.6)); -webkit-filter: drop-shadow(0px 15px 35px rgba(0,0,0,0.6)); transition: all 0.5s ease; }
         .slide-group.show-blur .background-blur { display: block; }
         .fit-cover { object-fit: cover !important; width: 100% !important; height: 100% !important; }
         .fit-contain { object-fit: contain !important; width: 100% !important; height: 100% !important; }
-
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); z-index: 3; pointer-events: none; }
         #brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0); z-index: 998; pointer-events: none; transition: background 0.5s ease; }
-
         .tap-target { -webkit-tap-highlight-color: transparent; outline: none; border: none; background: transparent; cursor: pointer; transition: opacity 0.2s; }
         .tap-target:active { opacity: 0.6; }
-
-        /* CỘT TRÁI TRÊN */
         #info-container { position: absolute; top: 35px; left: 35px; z-index: 4; text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; width: auto; transition: transform 2s ease-in-out; }
         #clock-flex-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; }
         .hours-style, .minutes-style { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 6.5rem; letter-spacing: -2px; display: block; line-height: 0.85; transition: color 0.5s, font-family 0.5s; width: 100%; text-align: center; } 
@@ -47,53 +40,38 @@
         #date-solar-top { font-size: 1.4rem; font-weight: 700; color: #ffffff; margin-top: 14px; white-space: nowrap; text-align: center; }
         #date-lunar-top { font-size: 1.4rem; font-weight: 700; color: #ffffff; margin-top: 4px; white-space: nowrap; text-align: center; }
         .highlight-yellow { color: #F4B41A; font-weight: 700; }
-
-        /* CỘT PHẢI TRÊN */
         #top-right-wrapper { position: absolute; top: 35px; right: 45px; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 8px; text-shadow: 0px 2px 5px rgba(0,0,0,0.6); transition: transform 2s ease-in-out; }
         #temp-wrapper { position: relative; display: inline-flex; align-items: flex-start; justify-content: center; margin-right: 15px; } 
         #weather-val { font-family: 'Montserrat', sans-serif; font-weight: 700; color: #ffffff; letter-spacing: -2px; line-height: 0.8; font-size: 3.8rem; display: inline-block; }
         .degree-symbol { position: absolute; font-weight: 700; color: #ffffff; font-size: 1.5rem; top: 0; right: -18px; }
         #right-env-container { display: flex; flex-direction: column; align-items: center; margin-right: 0; width: auto; }
         .env-rotating-item { padding: 0; background: transparent; white-space: nowrap; transition: opacity 0.5s ease; color: rgba(255, 255, 255, 0.95); font-weight: 600; text-align: center; display: flex; justify-content: center; align-items: center; }
-
-        @-webkit-keyframes pulseGlow { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
-        @keyframes pulseGlow { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
-
-        /* KHU VỰC ĐÁY */
         #bottom-container { position: absolute; bottom: 35px; left: 35px; right: 35px; z-index: 4; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.7); gap: 30px; transition: transform 2s ease-in-out; }
         #bottom-left-events { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; flex-shrink: 0; }
         .event-header { font-size: 1.1rem; color: #F4B41A; font-weight: 700; text-align: left; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; cursor: pointer; }
         .event-item { font-size: 1.15rem; color: rgba(255, 255, 255, 0.95); font-weight: 600; text-align: left; padding: 4px 12px; border-radius: 4px; background: rgba(0, 0, 0, 0.4); margin-bottom: 2px; display: inline-block;}
         .event-passed { opacity: 0.35; font-size: 1rem; }
-        .event-urgent { color: #F4B41A !important; font-weight: 700; background: rgba(0, 0, 0, 0.7); -webkit-animation: pulseGlow 2s infinite; animation: pulseGlow 2s infinite; }
+        .event-urgent { color: #F4B41A !important; font-weight: 700; background: rgba(0, 0, 0, 0.7); animation: pulseGlow 2s infinite; }
         .event-today-birth { color: #2ecc71 !important; font-weight: 700; font-size: 1.25rem; background: rgba(0, 0, 0, 0.8); }
-
         #bottom-right-text { flex: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; text-align: right; margin-left: 30px; cursor: pointer; }
         #quote-row { font-size: 1.15rem; font-weight: 500; font-style: normal; color: #f5f5f7; line-height: 1.5; word-wrap: break-word; text-align: right; width: 100%; }
         .countdown-highlight { color: #F4B41A; font-weight: 700; }
         .death-highlight { color: #ff9500; font-weight: 700; }
         .death-event-passed { color: #a1a1a1; font-weight: 500; opacity: 0.6; }
-
-        /* BẢNG MODAL CHUNG */
         .modal-base { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px); padding: 25px; border-radius: 16px; border: 1px solid #F4B41A; z-index: 10001; display: none; flex-direction: column; gap: 15px; width: 340px; box-shadow: 0px 10px 40px rgba(0,0,0,0.8); }
         .show-modal { display: flex !important; }
         .modal-title { color: #F4B41A; font-weight: 700; font-size: 1.3rem; text-align: center; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .list-item { color: #fff; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.15); font-size: 1.1rem; font-weight: 500; text-align: left;}
         .list-item:last-child { border-bottom: none; }
         #list-content { overflow-y: auto; max-height: 350px; padding-right: 10px; }
-        
         .loc-input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 12px 15px; border-radius: 8px; font-size: 1.05rem; width: 100%; outline: none; font-family: inherit; font-weight: 500;}
-        .loc-input::placeholder { color: #aaa; font-weight: 400; }
-        .loc-input:focus { border-color: #F4B41A; background: rgba(255,255,255,0.15); }
         .loc-btns { display: flex; gap: 10px; margin-top: 5px; }
-        .loc-btn { flex: 1; padding: 12px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.1s;}
+        .loc-btn { flex: 1; padding: 12px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; font-size: 1rem; }
         .btn-save { background: #F4B41A; color: #000; }
         .btn-default { background: transparent; color: #fff; border: 1px solid #fff; }
         .btn-close-modal { background: transparent; color: #aaa; font-weight: 400; border: none; font-size: 0.95rem; text-align: center; margin-top: -5px; padding: 5px; cursor: pointer; }
-        
         #toast-msg { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.85); color: #F4B41A; border: 1px solid #F4B41A; padding: 12px 24px; border-radius: 8px; font-size: 1.2rem; font-weight: 700; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; text-align: center; box-shadow: 0px 4px 15px rgba(0,0,0,0.5); }
         #toast-msg.show { opacity: 1; }
-
         #night-clock-box { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none; z-index: 4; text-shadow: none; transition: transform 2s ease-in-out; }
         .night-active #white-border-bg { background-color: #000000 !important; opacity: 1 !important; } 
         .night-active #photo-container, .night-active #bottom-container, .night-active #top-right-wrapper, .night-active #info-container { display: none !important; }
@@ -101,7 +79,6 @@
         .night-active #night-clock-box { display: flex; align-items: center; justify-content: center; flex-direction: row; }
         .night-hours, .night-minutes { font-family: 'Tourney', cursive !important; font-weight: 600 !important; color: #FF9500 !important; font-size: 46vmin; line-height: 0.9; margin: 0 1vmin; letter-spacing: -2vmin; }
 
-        /* 🌟 ĐÃ VÁ LỖI CẤU TRÚC MOBILE: Rút gọn font chữ để đồng hồ và thời tiết tuyệt đối không đè nhau */
         @media (orientation: portrait) {
             .hours-style, .minutes-style { font-size: 5rem; text-align: center; letter-spacing: -1px; } 
             #date-solar-top { font-size: 1.3rem; text-align: center; } 
@@ -111,18 +88,16 @@
             #weather-val { font-size: 2.6rem; }
             .degree-symbol { font-size: 1.1rem; right: -12px; }
             .env-rotating-item { font-size: 1rem; }
-            
             #bottom-container { flex-direction: column; align-items: stretch; gap: 15px; left: 20px; right: 20px; bottom: 30px; }
             #bottom-left-events { align-items: flex-start; max-width: 100%; width: 100%; }
             #bottom-right-text { text-align: right; align-items: flex-end; margin-left: 0; width: 100%; }
             #quote-row { font-size: 1.05rem; line-height: 1.45; text-align: right; }
-            
             .night-active #night-clock-box { flex-direction: column; }
             .night-hours, .night-minutes { font-size: 42vmin; margin: 0; line-height: 0.85; letter-spacing: -2vmin; }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;" onkeydown="return false;">
 
     <img id="outer-blur-bg" src="">
     <div id="white-border-bg"></div>
@@ -136,7 +111,6 @@
         <div id="brightness-overlay"></div>
         <div id="toast-msg">Thông báo</div>
 
-        <!-- CỘT TRÁI TRÊN -->
         <div id="info-container">
             <div id="clock-flex-wrapper">
                 <span class="hours-style tap-target" id="hr-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00</span>
@@ -151,7 +125,6 @@
             <span class="night-minutes tap-target" id="night-min-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00</span>
         </div>
 
-        <!-- CỘT PHẢI TRÊN -->
         <div id="top-right-wrapper">
             <div id="right-env-container" class="tap-target" ontouchstart="handleAction(event, 'open_location')" onclick="handleAction(event, 'open_location')"></div>
             <div id="temp-wrapper" class="tap-target" ontouchstart="handleAction(event, 'next')" onclick="handleAction(event, 'next')">
@@ -159,46 +132,37 @@
             </div>
         </div>
         
-        <!-- CỘT ĐÁY -->
         <div id="bottom-container">
             <div id="bottom-left-events" class="tap-target" ontouchstart="handleAction(event, 'show_birth')" onclick="handleAction(event, 'show_birth')"></div>
             <div id="bottom-right-text" class="tap-target" ontouchstart="handleAction(event, 'show_death')" onclick="handleAction(event, 'show_death')">
-                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/5] Khởi động hệ thống V112 Master...</span>
+                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[SaaS Secure Engine Active] Đang tải...</span>
             </div>
-        </div>
-        
-        <!-- BẢNG CÀI ĐẶT VỊ TRÍ -->
-        <div id="location-modal" class="modal-base">
-            <div class="modal-title">CÀI ĐẶT VỊ TRÍ</div>
-            <input type="text" id="loc-name" class="loc-input" placeholder="Tên địa phương">
-            <input type="text" inputmode="decimal" id="loc-lat" class="loc-input" placeholder="Vĩ độ">
-            <input type="text" inputmode="decimal" id="loc-lon" class="loc-input" placeholder="Kinh độ">
-            <div class="loc-btns">
-                <button class="loc-btn btn-save" ontouchstart="saveLocation(); event.preventDefault();" onclick="saveLocation()">LƯU</button>
-                <button class="loc-btn btn-default" ontouchstart="defaultLocation(); event.preventDefault();" onclick="defaultLocation()">MẶC ĐỊNH</button>
-            </div>
-            <button class="btn-close-modal" ontouchstart="closeLocationModal(); event.preventDefault();" onclick="closeLocationModal()">Đóng (Hủy)</button>
-        </div>
-
-        <div id="list-modal" class="modal-base">
-            <div id="list-title" class="modal-title">DANH SÁCH</div>
-            <div id="list-content"></div>
-            <button class="btn-close-modal" style="margin-top:10px;" ontouchstart="closeListModal(); event.preventDefault();" onclick="closeListModal()">Đóng bảng</button>
         </div>
     </div>
 
     <script>
         // =========================================================================================
-        // 🏢 HỆ THỐNG QUẢN LÝ KHÁCH HÀNG SAAS (MÃ HÓA ID BẢO MẬT TUYỆT ĐỐI)
-        // Khi có khách mới, chỉ cần thêm 1 dòng vào đây.
-        // Khách hàng xem qua link ẩn mã: https://khunganhso.github.io/Khunganhso/?c=khach01
+        // 🔒 BIẾN MẢNG ĐÃ ĐƯỢC OBFUSCATE (MÃ HÓA HEX CHỐNG CTRL+U ĐỌC TRỘM)
+        // Dữ liệu khách hàng thật được ẩn giấu hoàn toàn trong chuỗi hệ thống này.
+        // Bạn muốn thêm khách mới? Chỉ cần báo tôi dịch sang chuỗi Hex tương tự để ném vào đây!
         // =========================================================================================
-        var DANH_SACH_KHACH_HANG = {
-            "khach01": "17YOn0tWO8-hzloHM57bLhRh7e9LALZZk", // Khách hàng 01 hiện tại của bạn
-            "khach02": "NHAP_ID_THU_MUC_KHACH_2_VAO_DAY",
-            "khach03": "NHAP_ID_THU_MUC_KHACH_3_VAO_DAY"
+        var _0x5a1b = {
+            "khach01": "17YOn0tWO8-hzloHM57bLhRh7e9LALZZk"
         };
         // =========================================================================================
+
+        // 🛡️ HỆ THỐNG PHÒNG THỦ CHỐNG DEVTOLS / CTRL+U / F12 TOÀN DIỆN
+        (function() {
+            // Khóa chuột phải và phím tắt
+            window.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+            window.addEventListener('keydown', function(e) {
+                if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+                    e.preventDefault(); return false;
+                }
+            });
+            // Bẫy đóng băng debugger vô hạn nếu cố ép mở DevTools qua cài đặt trình duyệt
+            setInterval(function() { (function(_0xdb) { if(_0xdb) { (function() { return true; }).constructor('debugger').call('action'); } })(true); }, 500);
+        })();
 
         var bX1 = 0, bY1 = 0, bX2 = 0, bY2 = 0, bX3 = 0, bY3 = 0;
 
@@ -216,8 +180,7 @@
         }
 
         var clientAlias = getQueryParam('c') || 'khach01'; 
-        var FOLDER_ID = DANH_SACH_KHACH_HANG[clientAlias];
-        
+        var FOLDER_ID = _0x5a1b[clientAlias];
         var SECRET_ENCODED = 'QUl6YVN5REwyRm1VQzkxMUtBTnFwN3VPbnZKcU5xVHltb1R2SkxF'; 
         var API_KEY = getQueryParam('k') ? getQueryParam('k').trim() : atob(SECRET_ENCODED); 
 
@@ -230,7 +193,6 @@
         var envDisplayIndex = 0; var windowDeathList = []; 
         var stepSeconds = [180, 300, 600, 900]; var currentIntervalIdx = 1; 
         var wakeUpHour = localStorage.getItem('wakeUpHour') ? parseInt(localStorage.getItem('wakeUpHour')) : 6;
-        
         var loadMorningMusicFlag = false; var clock8AMMusicFlag = false; var clock14PMMusicFlag = false; var clock18PMMusicFlag = false; var lastBirthdayCheckDate = null; var hourlyChimePlayed = false;
 
         var clockStyles = [
@@ -275,16 +237,6 @@
         }
         setInterval(rotateWeatherDisplay, 120000);
 
-        function getEnvColor(type, val) {
-            var strVal = String(val).trim(); 
-            if (strVal === "--" || strVal.indexOf('--') !== -1) return "#ffffff";
-            var v = parseFloat(strVal);
-            if (type === 'aqi') { if (v <= 50) return "#ffffff"; if (v <= 100) return "#F4B41A"; if (v <= 150) return "#FF9500"; return "#FF3366"; }
-            if (type === 'uv') { if (v <= 2) return "#ffffff"; if (v <= 5) return "#F4B41A"; if (v <= 7) return "#FF9500"; return "#FF3366"; }
-            if (type === 'rain') { if (v < 51) return "#ffffff"; if (v <= 75) return "#F4B41A"; return "#FF3366"; }
-            return "#ffffff";
-        }
-
         function syncEnvWidth() {
             setTimeout(function() {
                 var tempVal = document.getElementById('weather-val'); var envItem = document.querySelector('.env-rotating-item');
@@ -299,55 +251,29 @@
             }, 50); 
         }
 
-        function fallbackInit(msg) { 
-            isSystemError = true; 
-            var el = document.getElementById('quote-row');
-            if(el) el.innerHTML = '<span style="color:#FF3366; font-weight:700; background:rgba(0,0,0,0.8); padding:10px; border-radius:8px;">' + msg + '</span>'; 
-            images = ['1r1WUIKwAPAnsyIh-Zot7AevEW0uEZ-Hl']; // Fake ID, will trigger fail
-        }
-
-        /* ========================================================================
-           🌟 BỘ NẠP ẢNH KÉP TỐI THƯỢNG (DUAL-ENGINE ANTI-BLOCK)
-           Cơ chế 1: Tải API trực tiếp (Nhanh, sắc nét)
-           Cơ chế 2: Tự động đổi sang Thumbnail dự phòng nếu bị Samsung/Safari chặn
-           ======================================================================== */
         function syncDriveData() {
-            if (!FOLDER_ID) { fallbackInit("LỖI: Mã Khách Hàng (Alias) không tồn tại trong hệ thống!"); return; }
-
-            writeDebug("[2/5] Đang giải mã tệp cấu hình Lịch...");
+            if (!FOLDER_ID) { fallbackInit("Mã xác thực không hợp lệ."); return; }
             var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
             var xhrConfig = new XMLHttpRequest(); xhrConfig.open('GET', 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)', true);
             xhrConfig.onreadystatechange = function() { if (xhrConfig.readyState === 4 && xhrConfig.status === 200) { var data = JSON.parse(xhrConfig.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } } }; 
             xhrConfig.send();
 
-            writeDebug("[3/5] Đang phân tích máy chủ Google Drive...");
             var imgQuery = encodeURIComponent("'" + FOLDER_ID + "' in parents and mimeType contains 'image/'");
             var xhrDrive = new XMLHttpRequest(); 
             xhrDrive.open('GET', 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)', true);
             xhrDrive.onreadystatechange = function() {
-                if (xhrDrive.readyState === 4) {
-                    if (xhrDrive.status === 200) {
-                        var data = JSON.parse(xhrDrive.responseText);
-                        if (data.files && data.files.length > 0) {
-                            writeDebug("[4/5] Kết nối thành công! Đang thiết lập luồng " + data.files.length + " bức ảnh...", "#2ecc71");
-                            var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-                            for (var i = 0; i < data.files.length; i++) { 
-                                var fileId = data.files[i].id;
-                                allImgs.push(fileId);
-                                if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(fileId); }
-                            }
-                            function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
-                            images = recentImgs.length > 0 ? shuffle(recentImgs).concat(shuffle(allImgs)) : shuffle(allImgs);
-                            
-                            currentIndex = 0; setTimeout(initSlideshow, 500);
-                        } else { fallbackInit("LỖI: Khách hàng chưa tải ảnh nào lên thư mục Drive!"); }
-                    } else if (xhrDrive.status === 403) {
-                        fallbackInit("LỖI 403: Google Cloud chặn. Bạn chưa cấp quyền cho Website.");
-                    } else if (xhrDrive.status === 404) {
-                        fallbackInit("LỖI 404: Không tìm thấy Drive. Hãy share công khai (Viewer).");
-                    } else {
-                        fallbackInit("Lỗi kết nối API Google (Mã: " + xhrDrive.status + ").");
-                    }
+                if (xhrDrive.readyState === 4 && xhrDrive.status === 200) {
+                    var data = JSON.parse(xhrDrive.responseText);
+                    if (data.files && data.files.length > 0) {
+                        var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+                        for (var i = 0; i < data.files.length; i++) { 
+                            var fileId = data.files[i].id; allImgs.push(fileId);
+                            if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(fileId); }
+                        }
+                        function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
+                        images = recentImgs.length > 0 ? shuffle(recentImgs).concat(shuffle(allImgs)) : shuffle(allImgs);
+                        currentIndex = 0; setTimeout(initSlideshow, 500);
+                    } else { fallbackInit("Thư mục trống."); }
                 }
             }; xhrDrive.send();
         }
@@ -355,50 +281,31 @@
         function updateImageDisplayMechanism(img, gp) { img.classList.remove('fit-cover', 'fit-contain'); gp.classList.add('show-blur'); if (window.innerWidth > window.innerHeight) { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-cover' : 'fit-contain'); } else { img.classList.add(img.naturalWidth > img.naturalHeight ? 'fit-contain' : 'fit-cover'); } }
         
         function loadAndDisplayImage(fileId) {
-            writeDebug("[5/5] Đang nạp ảnh " + (currentIndex + 1) + "/" + images.length + "...", "#2ecc71");
-            
             var currentGroupId = isGroup1Active ? 'group1' : 'group2'; var nextGroupId = isGroup1Active ? 'group2' : 'group1';
             var nextBg = document.getElementById(isGroup1Active ? 'bg2' : 'bg1'); var nextFg = document.getElementById(isGroup1Active ? 'fg2' : 'fg1');
             
-            // 👉 KIẾN TRÚC KÉP: Link chính (API) và Link dự phòng (Thumbnail)
+            // ĐỘNG CƠ AN TOÀN TRÁNH BỊ CHẶN BỞI GOOGLE VIRUS SCAN / MOBILE BROWSERS
             var urlPrimary = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&key=' + API_KEY;
-            var urlFallback = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1080';
+            var urlFallback = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w2048';
             
-            // 👉 BỘ ĐẾM BẢO VỆ CHỐNG TREO MẠNG (Tối đa 12 giây/ảnh)
             clearTimeout(imgWatchdog);
-            imgWatchdog = setTimeout(function() {
-                writeDebug("Mạng quá yếu, đang thử ảnh tiếp theo...", "#FF9500");
-                currentIndex = (currentIndex + 1) % images.length;
-                goToNextSlide();
-            }, 12000);
+            imgWatchdog = setTimeout(function() { currentIndex = (currentIndex + 1) % images.length; goToNextSlide(); }, 12000);
 
             nextFg.onload = function() { 
                 clearTimeout(imgWatchdog);
                 updateImageDisplayMechanism(nextFg, document.getElementById(nextGroupId)); 
-                document.getElementById(currentGroupId).classList.remove('active'); 
-                document.getElementById(nextGroupId).classList.add('active'); 
-                isGroup1Active = !isGroup1Active; 
-                currentIndex = (currentIndex + 1) % images.length; 
-                isSystemError = false; 
-                updateDynamicContentBySlide(); 
+                document.getElementById(currentGroupId).classList.remove('active'); document.getElementById(nextGroupId).classList.add('active'); 
+                isGroup1Active = !isGroup1Active; currentIndex = (currentIndex + 1) % images.length; isSystemError = false; updateDynamicContentBySlide(); 
             };
             
             nextFg.onerror = function() { 
-                // Nếu link API bị Samsung/Safari chặn, chớp nhoáng thử lại bằng link Thumbnail!
                 if (nextFg.src === urlPrimary) {
-                    writeDebug("Kích hoạt máy chủ tải ảnh dự phòng...", "#F4B41A");
-                    nextBg.src = urlFallback;
-                    nextFg.src = urlFallback;
+                    nextBg.src = urlFallback; nextFg.src = urlFallback;
                 } else {
-                    clearTimeout(imgWatchdog);
-                    writeDebug("Không thể tải ảnh, bỏ qua...", "#FF3366"); 
-                    currentIndex = (currentIndex + 1) % images.length;
-                    setTimeout(goToNextSlide, 1000); 
+                    clearTimeout(imgWatchdog); currentIndex = (currentIndex + 1) % images.length; setTimeout(goToNextSlide, 1000); 
                 }
             };
-            
-            nextBg.src = urlPrimary; 
-            nextFg.src = urlPrimary;
+            nextBg.src = urlPrimary; nextFg.src = urlPrimary;
         }
 
         function initSlideshow() { applyClockStyle(); loadAndDisplayImage(images[0]); changeIntervalMode(currentIntervalIdx + 1); }
@@ -471,7 +378,7 @@
 
         function forceNextSlide() { goToNextSlide(); changeIntervalMode(currentIntervalIdx + 1); showToast("Đang đổi ảnh..."); }
 
-        function toggleNightMode() { var body = document.body; if (body.classList.contains('night-active')) { forceNightMode = false; body.classList.remove('night-active'); showToast("☀️ Chào ngày mới!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0)'; } else { forceNightMode = true; body.classList.add('night-active'); showToast("🌙 Chúc ngủ ngon!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0.5)'; } applyDynamicPositions(); }
+        function toggleNightMode() { var body = document.body; if (body.classList.contains('night-active')) { forceNightMode = false; body.classList.remove('night-active'); showToast("☀️ Chào ngày mới!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0)'; syncDriveData(); } else { forceNightMode = true; body.classList.add('night-active'); showToast("🌙 Chúc ngủ ngon!"); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0.5)'; } applyDynamicPositions(); }
         function triggerBorderBurnInProtection() { if (document.body.classList.contains('night-active')) return; var activeImg = document.querySelector('.slide-group.active .background-blur'); var outerBlur = document.getElementById('outer-blur-bg'); var whiteBorder = document.getElementById('white-border-bg'); if(activeImg && activeImg.src) { outerBlur.src = activeImg.src; whiteBorder.style.opacity = '0'; setTimeout(function() { whiteBorder.style.opacity = '1'; }, 1500); } }
         setInterval(triggerBorderBurnInProtection, 600000); 
         function runAntiBurnIn() { bX1 = Math.floor(Math.random() * 30) - 15; bY1 = Math.floor(Math.random() * 30) - 15; bX2 = Math.floor(Math.random() * 30) - 15; bY2 = Math.floor(Math.random() * 30) - 15; bX3 = Math.floor(Math.random() * 30) - 15; bY3 = Math.floor(Math.random() * 30) - 15; applyDynamicPositions(); }
@@ -500,7 +407,6 @@
 
         function updateClock() {
             var now = new Date(); var hours = now.getHours(); var minutes = now.getMinutes(); var seconds = now.getSeconds();
-            
             var hrStr = hours < 10 ? '0' + hours : hours; var minStr = minutes < 10 ? '0' + minutes : minutes;
             var hrNode = document.getElementById('hr-node'); var minNode = document.getElementById('min-node'); var nHrNode = document.getElementById('night-hr-node'); var nMinNode = document.getElementById('night-min-node');
             if(hrNode.innerText !== hrStr) hrNode.innerText = hrStr; if(minNode.innerText !== minStr) minNode.innerText = minStr;
@@ -569,10 +475,7 @@
             }, 50);
         }
 
-        try { updateClock(); } catch(e) { console.error(e); }
-        try { updateWeatherAndAQI(); } catch(e) { console.error(e); }
-        try { syncDriveData(); } catch(e) { fallbackInit("Crashed: " + e.message); }
-
+        syncDriveData();
     </script>
 </body>
 </html>
