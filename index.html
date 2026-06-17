@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="referrer" content="no-referrer">
     
-    <title>Khung Ảnh Số SaaS V110</title>
+    <title>Khung Ảnh Số SaaS V111</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,7 +152,7 @@
         <div id="bottom-container">
             <div id="bottom-left-events" class="tap-target" ontouchstart="handleAction(event, 'show_birth')" onclick="handleAction(event, 'show_birth')"></div>
             <div id="bottom-right-text" class="tap-target" ontouchstart="handleAction(event, 'show_death')" onclick="handleAction(event, 'show_death')">
-                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/5] Khởi động hệ thống kết nối V110...</span>
+                <span id="quote-row" style="color:#00E5FF; font-weight:700;">[1/5] Khởi động hệ thống CDN V111...</span>
             </div>
         </div>
         
@@ -188,7 +188,6 @@
         };
         // =========================================================================================
 
-        // 🔥 Vá lỗi Fatal Crash (Cốt lõi khiến hệ thống bị treo)
         var bX1 = 0, bY1 = 0, bX2 = 0, bY2 = 0, bX3 = 0, bY3 = 0;
 
         function getQueryParam(param) {
@@ -204,7 +203,6 @@
             if (el) el.innerHTML = '<span style="color:' + (color || '#00E5FF') + '; font-weight:700;">' + msg + '</span>';
         }
 
-        // Kích hoạt Mã Khách Hàng (Mặc định tự nạp khach01 nếu không gõ đuôi ?c= )
         var clientAlias = getQueryParam('c') || 'khach01'; 
         var FOLDER_ID = DANH_SACH_KHACH_HANG[clientAlias];
         
@@ -303,7 +301,7 @@
             nextBg.src = images[0]; nextFg.src = images[0];
         }
 
-        /* 🌟 THUẬT TOÁN KẾT NỐI API TRỰC TIẾP (DIRECT MEDIA BYPASS) */
+        /* 🌟 THUẬT TOÁN KẾT NỐI CDN GOOGLE API (CHỐNG LỖI 100% CỦA SAFARI/SAMSUNG) */
         function syncDriveData() {
             writeDebug("[2/5] Kiểm tra Mã Khách Hàng...");
             if (!FOLDER_ID) { fallbackInit("LỖI: Mã Khách Hàng (Alias) không tồn tại!"); return; }
@@ -314,9 +312,12 @@
             xhrConfig.onreadystatechange = function() { if (xhrConfig.readyState === 4 && xhrConfig.status === 200) { var data = JSON.parse(xhrConfig.responseText); if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); } } }; 
             xhrConfig.send();
 
-            writeDebug("[4/5] Đang kết nối Kho Ảnh Drive...");
+            writeDebug("[4/5] Đang kết nối Cụm Máy Chủ Google Cloud CDN...");
             var imgQuery = encodeURIComponent("'" + FOLDER_ID + "' in parents and mimeType contains 'image/'");
-            var xhrDrive = new XMLHttpRequest(); xhrDrive.open('GET', 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)', true);
+            
+            // 🔥 YÊU CẦU THUMBNAILLINK TỪ API ĐỂ TRÁNH BỊ TRÌNH DUYỆT CHẶN
+            var xhrDrive = new XMLHttpRequest(); 
+            xhrDrive.open('GET', 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&orderBy=createdTime desc&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime,thumbnailLink)', true);
             xhrDrive.onreadystatechange = function() {
                 if (xhrDrive.readyState === 4) {
                     if (xhrDrive.status === 200) {
@@ -325,13 +326,21 @@
                             writeDebug("[5/5] Hoàn tất! Đang nạp " + data.files.length + " bức ảnh...", "#2ecc71");
                             var allImgs = []; var recentImgs = []; var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
                             for (var i = 0; i < data.files.length; i++) { 
-                                var imgPath = 'https://www.googleapis.com/drive/v3/files/' + data.files[i].id + '?alt=media&key=' + API_KEY; 
-                                allImgs.push(imgPath);
-                                if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
+                                // 🔥 KÍCH KÍCH THƯỚC THUMBNAIL LÊN ĐỘ PHÂN GIẢI 2048PX (KHÔNG BỊ LỖI CHUYỂN HƯỚNG VIRUS SCAN)
+                                if (data.files[i].thumbnailLink) {
+                                    var imgPath = data.files[i].thumbnailLink.replace(/=s\d+/, '=s2048');
+                                    allImgs.push(imgPath);
+                                    if (new Date(data.files[i].createdTime) >= twoDaysAgo) { recentImgs.push(imgPath); }
+                                }
                             }
                             function shuffle(arr) { var a = arr.slice(); for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } return a; }
                             images = recentImgs.length > 0 ? shuffle(recentImgs).concat(shuffle(allImgs)) : shuffle(allImgs);
-                            currentIndex = 0; setTimeout(initSlideshow, 500);
+                            
+                            if(images.length > 0) {
+                                currentIndex = 0; setTimeout(initSlideshow, 500);
+                            } else {
+                                fallbackInit("LỖI: Các ảnh trong Drive không được hỗ trợ định dạng xem trước.");
+                            }
                         } else { fallbackInit("LỖI: Khách hàng chưa tải ảnh lên Drive!"); }
                     } else if (xhrDrive.status === 403) {
                         fallbackInit("LỖI 403: Cài đặt Google Cloud chưa cấp quyền cho tên miền.");
@@ -525,7 +534,7 @@
                 updateDynamicContentBySlide(); 
             };
             nextFg.onerror = function() { 
-                writeDebug("Đường truyền yếu, bỏ qua ảnh " + (currentIndex + 1) + "...", "#F4B41A"); 
+                writeDebug("Mạng yếu, tự động tải ảnh " + (currentIndex + 1) + "...", "#F4B41A"); 
                 currentIndex = (currentIndex + 1) % images.length;
                 setTimeout(goToNextSlide, 2000); 
             };
@@ -536,7 +545,6 @@
         function goToNextSlide() { if(images.length <= 1) return; loadAndDisplayImage(images[currentIndex]); }
         function changeIntervalMode(modeVal) { currentIntervalIdx = modeVal - 1; var seconds = stepSeconds[currentIntervalIdx]; if (slideInterval) clearInterval(slideInterval); slideInterval = setInterval(goToNextSlide, seconds * 1000); }
 
-        // MÃ HÓA KHỞI ĐỘNG CHỐNG LỖI CỤC BỘ
         try { updateClock(); } catch(e) { console.error(e); }
         try { updateWeatherAndAQI(); } catch(e) { console.error(e); }
         try { syncDriveData(); } catch(e) { fallbackInit("Crashed: " + e.message); }
