@@ -1,1674 +1,928 @@
+TÔI MUỐN CHÚNG TA BẮT ĐẦU TẠO CODE CHO KHÁCH LẠI TỪ CODE PHIÊN BẢN CÁ NHÂN NÀY, VÌ CODE NÀY ĐANG HOẠT ĐỘNG TỐT NHÂT.
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SaaS Smart Frame</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="referrer" content="no-referrer">
+    
+    <title>Khung Ảnh Số Thông Minh - V102 Ultimate Full Code</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tourney:wght@600&family=Playfair+Display:wght@700&family=Oswald:wght@600&family=Righteous&family=Courier+Prime:wght@700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; cursor: pointer; }
+        
+        #outer-blur-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(45px) brightness(0.6); z-index: 0; transform: scale(1.2); }
+        #white-border-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 1; transition: opacity 1.5s ease-in-out; }
+        #frame-wrapper { position: absolute; top: 45px; bottom: 45px; left: 45px; right: 45px; background-color: #000; overflow: hidden; box-shadow: 0px 15px 45px rgba(0, 0, 0, 0.15), inset 0px 0px 30px rgba(0,0,0,0.85); border: 1px solid #eaeaea; transition: all 0.5s ease; z-index: 5; }
+        
+        #photo-container, .slide-group { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #photo-container { z-index: 1; }
+        .slide-group { opacity: 0; transition: opacity 3s ease-in-out; display: block; }
+        .slide-group.active { opacity: 1; z-index: 2; }
+        
+        .background-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover !important; filter: blur(40px) brightness(0.85); -webkit-filter: blur(40px) brightness(0.85); transform: scale(1.3); z-index: 1; display: none; }
+        .foreground-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; flex-shrink: 0; filter: drop-shadow(0px 15px 35px rgba(0,0,0,0.6)); -webkit-filter: drop-shadow(0px 15px 35px rgba(0,0,0,0.6)); transition: all 0.5s ease; }
+        .slide-group.show-blur .background-blur { display: block; }
+        .fit-cover { object-fit: cover !important; width: 100% !important; height: 100% !important; }
+        .fit-contain { object-fit: contain !important; width: 100% !important; height: 100% !important; }
+
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); z-index: 3; pointer-events: none; }
+        #brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0); z-index: 998; pointer-events: none; transition: background 0.5s ease; }
+
+        .tap-target { -webkit-tap-highlight-color: transparent; outline: none; border: none; background: transparent; cursor: pointer; transition: opacity 0.2s; }
+        .tap-target:active { opacity: 0.6; }
+
+        /* CỘT TRÁI TRÊN (GIỜ LỊCH CĂN GIỮA) */
+        #info-container { position: absolute; top: 35px; left: 35px; z-index: 4; text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; width: auto; transition: transform 2s ease-in-out; }
+        #clock-flex-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; margin-left: 0; }
+        .hours-style, .minutes-style { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 6.5rem; letter-spacing: -2px; display: block; line-height: 0.85; transition: color 0.5s, font-family 0.5s; width: 100%; text-align: center; margin-left: 0; } 
+        .hours-style { color: #F4B41A; } .minutes-style { color: #ffffff; margin-top: 4px; }
+        #date-solar-top { font-size: 1.4rem; font-weight: 700; color: #ffffff; margin-top: 14px; white-space: nowrap; text-align: center; }
+        #date-lunar-top { font-size: 1.4rem; font-weight: 700; color: #ffffff; margin-top: 4px; white-space: nowrap; text-align: center; }
+        .highlight-yellow { color: #F4B41A; font-weight: 700; }
+
+        /* CỘT PHẢI TRÊN (NHIỆT ĐỘ CĂN GIỮA THỜI TIẾT) */
+        #top-right-wrapper { position: absolute; top: 35px; right: 45px; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 8px; text-shadow: 0px 2px 5px rgba(0,0,0,0.6); transition: transform 2s ease-in-out; }
+        #right-env-container { display: flex; flex-direction: column; align-items: center; margin-right: 0; width: auto; }
+        .env-rotating-item { padding: 0; background: transparent; white-space: nowrap; transition: opacity 0.5s ease; color: rgba(255, 255, 255, 0.95); font-weight: 600; text-align: center; display: flex; justify-content: center; align-items: center;}
+        #temp-wrapper { position: relative; display: inline-flex; align-items: flex-start; justify-content: center; flex-shrink: 0; margin-left: 0; text-align: center; margin-right: 0; width: auto; } 
+        #weather-val { font-family: 'Montserrat', sans-serif; font-weight: 700; color: #ffffff; letter-spacing: -2px; line-height: 0.8; font-size: 3.8rem; display: inline-block; }
+        .degree-symbol { position: absolute; font-weight: 700; color: #ffffff; font-size: 1.5rem; top: 0; right: -18px; }
+
+        @-webkit-keyframes pulseGlow { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+        @keyframes pulseGlow { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        /* KHU VỰC ĐÁY */
+        #bottom-container { position: absolute; bottom: 35px; left: 35px; right: 35px; z-index: 4; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.7); gap: 30px; transition: transform 2s ease-in-out; }
+        #bottom-left-events { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; flex-shrink: 0; }
+        .event-header { font-size: 1.1rem; color: #F4B41A; font-weight: 700; text-align: left; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; cursor: pointer; }
+        .event-item { font-size: 1.15rem; color: rgba(255, 255, 255, 0.95); font-weight: 600; text-align: left; padding: 4px 12px; border-radius: 4px; background: rgba(0, 0, 0, 0.4); margin-bottom: 2px; display: inline-block;}
+        .event-passed { opacity: 0.35; font-size: 1rem; }
+        .event-urgent { color: #F4B41A !important; font-weight: 700; background: rgba(0, 0, 0, 0.7); -webkit-animation: pulseGlow 2s infinite; animation: pulseGlow 2s infinite; }
+        .event-today-birth { color: #2ecc71 !important; font-weight: 700; font-size: 1.25rem; background: rgba(0, 0, 0, 0.8); }
+
+        #bottom-right-text { flex: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; text-align: right; margin-left: 30px; cursor: pointer; }
+        #quote-row { font-size: 1.15rem; font-weight: 500; font-style: normal; color: #f5f5f7; line-height: 1.5; word-wrap: break-word; text-align: right; width: 100%; }
+        .countdown-highlight { color: #F4B41A; font-weight: 700; }
+        .death-highlight { color: #ff9500; font-weight: 700; }
+        .death-event-passed { color: #a1a1a1; font-weight: 500; opacity: 0.6; }
+
+        /* BẢNG MODAL CHUNG */
+        .modal-base { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px); padding: 25px; border-radius: 16px; border: 1px solid #F4B41A; z-index: 10001; display: none; flex-direction: column; gap: 15px; width: 340px; box-shadow: 0px 10px 40px rgba(0,0,0,0.8); }
+        .show-modal { display: flex !important; }
+        .modal-title { color: #F4B41A; font-weight: 700; font-size: 1.3rem; text-align: center; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .list-item { color: #fff; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.15); font-size: 1.1rem; font-weight: 500; text-align: left;}
+        .list-item:last-child { border-bottom: none; }
+        #list-content { overflow-y: auto; max-height: 350px; padding-right: 10px; }
+        
+        .loc-input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 12px 15px; border-radius: 8px; font-size: 1.05rem; width: 100%; outline: none; font-family: inherit; font-weight: 500;}
+        .loc-input::placeholder { color: #aaa; font-weight: 400; }
+        .loc-input:focus { border-color: #F4B41A; background: rgba(255,255,255,0.15); }
+        .loc-btns { display: flex; gap: 10px; margin-top: 5px; }
+        .loc-btn { flex: 1; padding: 12px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.1s;}
+        .loc-btn:active { transform: scale(0.95); }
+        .btn-save { background: #F4B41A; color: #000; }
+        .btn-default { background: transparent; color: #fff; border: 1px solid #fff; }
+        .btn-close-modal { background: transparent; color: #aaa; font-weight: 400; border: none; font-size: 0.95rem; text-align: center; margin-top: -5px; padding: 5px; cursor: pointer; }
+        
+        #toast-msg { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.85); color: #F4B41A; border: 1px solid #F4B41A; padding: 12px 24px; border-radius: 8px; font-size: 1.2rem; font-weight: 700; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; text-align: center; box-shadow: 0px 4px 15px rgba(0,0,0,0.5); }
+        #toast-msg.show { opacity: 1; }
+
+        /* ĐỒNG HỒ BAN ĐÊM */
+        #night-clock-box { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none; z-index: 4; text-shadow: none; transition: transform 2s ease-in-out; }
+        .night-active #white-border-bg { background-color: #000000 !important; opacity: 1 !important; } 
+        .night-active #photo-container, .night-active #bottom-container, .night-active #top-right-wrapper, .night-active #info-container { display: none !important; }
+        .night-active #frame-wrapper { background-color: transparent !important; box-shadow: none !important; border-color: transparent !important; }
+        .night-active #night-clock-box { display: flex; align-items: center; justify-content: center; flex-direction: row; }
+        .night-hours, .night-minutes { font-family: 'Tourney', cursive !important; font-weight: 600 !important; color: #FF9500 !important; font-size: 46vmin; line-height: 0.9; margin: 0 1vmin; letter-spacing: -2vmin; }
+
+        /* MÀN HÌNH DỌC IPAD */
+        @media (orientation: portrait) {
+            .hours-style, .minutes-style { font-size: 7.5rem; text-align: center; } 
+            #date-solar-top { font-size: 1.6rem; text-align: center; } 
+            #date-lunar-top { font-size: 1.6rem; text-align: center; }
+            #bottom-container { flex-direction: column; align-items: stretch; gap: 15px; }
+            #bottom-left-events { align-items: flex-start; max-width: 100%; width: 100%; }
+            #bottom-right-text { text-align: right; align-items: flex-end; margin-left: 0; width: 100%; }
+            #quote-row { font-size: 1.15rem; line-height: 1.45; text-align: right; }
+            .night-active #night-clock-box { flex-direction: column; }
+            .night-hours, .night-minutes { font-size: 42vmin; margin: 0; line-height: 0.85; letter-spacing: -2vmin; }
+        }
+    </style>
 </head>
-<body style="background:#000; margin:0; overflow:hidden;" oncontextmenu="return false;" onkeydown="return false;">
+<body>
 
-<script>
-    const FOLDER_ID = "ID_THƯ_MỤC_CỦA_KHÁCH_1_BẠN_ĐIỀN_VÀO_ĐÂY"; 
-    const API_KEY = atob('QUl6YVN5REwyRm1VQzkxMUtBTnFwN3VPbnZKcU5xVHltb1R2SkxF');
+    <img id="outer-blur-bg" src="">
+    <div id="white-border-bg"></div>
 
-    function runEngine() {
-     var _0x1e4df6 = _0x4a05;
-(function (_0x1494ff, _0x1e9116) {
-    var _0x42300e = _0x4a05, _0x25ffa9 = _0x1494ff();
-    while (!![]) {
-        try {
-            var _0x2ab846 = parseInt(_0x42300e(0x1fd)) / 0x1 + -parseInt(_0x42300e(0x1b0)) / 0x2 * (-parseInt(_0x42300e(0x252)) / 0x3) + parseInt(_0x42300e(0x210)) / 0x4 + -parseInt(_0x42300e(0x195)) / 0x5 * (parseInt(_0x42300e(0x1cd)) / 0x6) + parseInt(_0x42300e(0x135)) / 0x7 * (parseInt(_0x42300e(0x147)) / 0x8) + parseInt(_0x42300e(0x254)) / 0x9 * (-parseInt(_0x42300e(0x1af)) / 0xa) + parseInt(_0x42300e(0x133)) / 0xb * (parseInt(_0x42300e(0x1b9)) / 0xc);
-            if (_0x2ab846 === _0x1e9116)
-                break;
-            else
-                _0x25ffa9['push'](_0x25ffa9['shift']());
-        } catch (_0x35e4df) {
-            _0x25ffa9['push'](_0x25ffa9['shift']());
-        }
-    }
-}(_0x488f, 0x817d5));
-const css = _0x1e4df6(0x229), styleTag = document[_0x1e4df6(0x1b3)](_0x1e4df6(0x20c));
-styleTag[_0x1e4df6(0x1e3)] = css, document[_0x1e4df6(0x186)][_0x1e4df6(0x14e)](styleTag), document[_0x1e4df6(0x237)]['innerHTML'] = _0x1e4df6(0x1d3);
-var images = [_0x1e4df6(0x19e)], currentIndex = 0x0, slideInterval, toastTimeout, locationModalTimeout, listModalTimeout, audioCtx = null, isGroup1Active = !![], audioUnlocked = ![], forceNightMode = null, globalAQI = '--', globalHum = '--', globalRain = '--', globalSunrise = '--', globalSunset = '--', globalUV = '--', globalAlt = '--', envDisplayIndex = 0x0, windowDeathList = [], bX1 = 0x0, bY1 = 0x0, bX2 = 0x0, bY2 = 0x0, bX3 = 0x0, bY3 = 0x0, stepSeconds = [
-        0xb4,
-        0x12c,
-        0x258,
-        0x384
-    ], currentIntervalIdx = 0x1, wakeUpHour = localStorage[_0x1e4df6(0x221)](_0x1e4df6(0x200)) ? parseInt(localStorage[_0x1e4df6(0x221)](_0x1e4df6(0x200))) : 0x6, loadMorningMusicFlag = ![], clock8AMMusicFlag = ![], clock14PMMusicFlag = ![], clock18PMMusicFlag = ![], lastBirthdayCheckDate = null, hourlyChimePlayed = ![], clockStyles = [
-        {
-            'f': '\x27Montserrat\x27,\x20sans-serif',
-            'hc': _0x1e4df6(0x230),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Montserrat\x27,\x20sans-serif',
-            'hc': _0x1e4df6(0x1f1),
-            'mc': _0x1e4df6(0x230),
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Tourney\x27,\x20cursive',
-            'hc': _0x1e4df6(0x230),
-            'mc': '#ffffff',
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x240),
-            'hc': _0x1e4df6(0x1f1),
-            'mc': _0x1e4df6(0x230),
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x19c),
-            'hc': '#F4B41A',
-            'mc': '#ffffff',
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x19c),
-            'hc': '#ffffff',
-            'mc': '#F4B41A',
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Oswald\x27,\x20sans-serif',
-            'hc': '#00E5FF',
-            'mc': '#ffffff',
-            'fw': 0x258
-        },
-        {
-            'f': '\x27Oswald\x27,\x20sans-serif',
-            'hc': '#F4B41A',
-            'mc': '#ffffff',
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x1a2),
-            'hc': _0x1e4df6(0x1d8),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x190
-        },
-        {
-            'f': '\x27Righteous\x27,\x20cursive',
-            'hc': _0x1e4df6(0x230),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x190
-        },
-        {
-            'f': _0x1e4df6(0x16e),
-            'hc': _0x1e4df6(0x211),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x16e),
-            'hc': _0x1e4df6(0x1f1),
-            'mc': '#F4B41A',
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Cinzel\x27,\x20serif',
-            'hc': _0x1e4df6(0x230),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x224),
-            'hc': _0x1e4df6(0x1f1),
-            'mc': _0x1e4df6(0x230),
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Montserrat\x27,\x20sans-serif',
-            'hc': _0x1e4df6(0x21d),
-            'mc': _0x1e4df6(0x1d8),
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Tourney\x27,\x20cursive',
-            'hc': _0x1e4df6(0x211),
-            'mc': _0x1e4df6(0x223),
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x19c),
-            'hc': '#E0E0E0',
-            'mc': _0x1e4df6(0x243),
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x1c1),
-            'hc': _0x1e4df6(0x223),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x1a2),
-            'hc': '#00E5FF',
-            'mc': _0x1e4df6(0x211),
-            'fw': 0x190
-        },
-        {
-            'f': _0x1e4df6(0x224),
-            'hc': _0x1e4df6(0x243),
-            'mc': _0x1e4df6(0x230),
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x1c6),
-            'hc': _0x1e4df6(0x223),
-            'mc': _0x1e4df6(0x230),
-            'fw': 0x2bc
-        },
-        {
-            'f': '\x27Courier\x20Prime\x27,\x20monospace',
-            'hc': _0x1e4df6(0x21d),
-            'mc': _0x1e4df6(0x21d),
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x240),
-            'hc': _0x1e4df6(0x1d8),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x19c),
-            'hc': _0x1e4df6(0x1f1),
-            'mc': '#ffffff',
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x1c1),
-            'hc': '#B4E61D',
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x1a2),
-            'hc': '#ffffff',
-            'mc': _0x1e4df6(0x1d8),
-            'fw': 0x190
-        },
-        {
-            'f': '\x27Cinzel\x27,\x20serif',
-            'hc': _0x1e4df6(0x223),
-            'mc': _0x1e4df6(0x1f1),
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x1c6),
-            'hc': _0x1e4df6(0x243),
-            'mc': '#FF3366',
-            'fw': 0x2bc
-        },
-        {
-            'f': _0x1e4df6(0x240),
-            'hc': _0x1e4df6(0x21d),
-            'mc': _0x1e4df6(0x211),
-            'fw': 0x258
-        },
-        {
-            'f': _0x1e4df6(0x19c),
-            'hc': _0x1e4df6(0x1d8),
-            'mc': _0x1e4df6(0x230),
-            'fw': 0x2bc
-        }
-    ], currentStyleIdx = parseInt(localStorage[_0x1e4df6(0x221)](_0x1e4df6(0x189)));
-if (isNaN(currentStyleIdx) || currentStyleIdx < 0x0 || currentStyleIdx >= clockStyles['length'])
-    currentStyleIdx = 0x0;
-var defaultLatitude = 12.6792, defaultLongitude = 108.0694, defaultLocalName = _0x1e4df6(0x1b2), clientLatitude = localStorage[_0x1e4df6(0x221)](_0x1e4df6(0x1ba)) ? parseFloat(localStorage[_0x1e4df6(0x221)](_0x1e4df6(0x1ba))) : defaultLatitude, clientLongitude = localStorage[_0x1e4df6(0x221)]('myLon') ? parseFloat(localStorage['getItem'](_0x1e4df6(0x1e6))) : defaultLongitude, clientLocalName = localStorage['getItem'](_0x1e4df6(0x161)) ? localStorage[_0x1e4df6(0x221)](_0x1e4df6(0x161)) : defaultLocalName, birthdays = [], anniversaries = [], festivalsData = [], specialtiesData = [], quotePool = [], phases = [
-        [
-            0x7e9,
-            0xb,
-            0x14,
-            0xb,
-            _0x1e4df6(0x19b)
-        ],
-        [
-            0x7ea,
-            0x0,
-            0x13,
-            0xc,
-            'Ất\x20Tỵ'
-        ],
-        [
-            0x7ea,
-            0x1,
-            0x11,
-            0x1,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x2,
-            0x13,
-            0x2,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x3,
-            0x11,
-            0x3,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x4,
-            0x10,
-            0x4,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x5,
-            0xf,
-            0x5,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x6,
-            0xe,
-            0x6,
-            'Bính\x20Ngọ'
-        ],
-        [
-            0x7ea,
-            0x7,
-            0xd,
-            0x7,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x8,
-            0xb,
-            0x8,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0x9,
-            0xb,
-            0x9,
-            'Bính\x20Ngọ'
-        ],
-        [
-            0x7ea,
-            0xa,
-            0xa,
-            0xa,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7ea,
-            0xb,
-            0x9,
-            0xb,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7eb,
-            0x0,
-            0x8,
-            0xc,
-            _0x1e4df6(0x1ac)
-        ],
-        [
-            0x7eb,
-            0x1,
-            0x6,
-            0x1,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0x2,
-            0x8,
-            0x2,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0x3,
-            0x7,
-            0x3,
-            'Đinh\x20Mùi'
-        ],
-        [
-            0x7eb,
-            0x4,
-            0x6,
-            0x4,
-            'Đinh\x20Mùi'
-        ],
-        [
-            0x7eb,
-            0x5,
-            0x5,
-            0x5,
-            'Đinh\x20Mùi'
-        ],
-        [
-            0x7eb,
-            0x6,
-            0x4,
-            0x6,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0x7,
-            0x2,
-            0x7,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0x7,
-            0x1f,
-            0x7,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0x8,
-            0x1d,
-            0x8,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0x9,
-            0x1d,
-            0x9,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0xa,
-            0x1c,
-            0xa,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7eb,
-            0xb,
-            0x1b,
-            0xb,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7ec,
-            0x0,
-            0x1a,
-            0xc,
-            _0x1e4df6(0x1da)
-        ],
-        [
-            0x7ec,
-            0x1,
-            0x1a,
-            0x1,
-            _0x1e4df6(0x174)
-        ],
-        [
-            0x7ec,
-            0x2,
-            0x19,
-            0x2,
-            _0x1e4df6(0x174)
-        ],
-        [
-            0x7ec,
-            0x3,
-            0x1a,
-            0x3,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ec,
-            0x4,
-            0x19,
-            0x4,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ec,
-            0x5,
-            0x18,
-            0x5,
-            _0x1e4df6(0x174)
-        ],
-        [
-            0x7ec,
-            0x6,
-            0x17,
-            0x5,
-            _0x1e4df6(0x174)
-        ],
-        [
-            0x7ec,
-            0x7,
-            0x16,
-            0x6,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ec,
-            0x8,
-            0x14,
-            0x7,
-            _0x1e4df6(0x174)
-        ],
-        [
-            0x7ec,
-            0x9,
-            0x13,
-            0x8,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ec,
-            0xa,
-            0x12,
-            0x9,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ec,
-            0xb,
-            0x11,
-            0xa,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ed,
-            0x0,
-            0x10,
-            0xb,
-            _0x1e4df6(0x174)
-        ],
-        [
-            0x7ed,
-            0x1,
-            0xf,
-            0xc,
-            'Mậu\x20Thân'
-        ],
-        [
-            0x7ed,
-            0x2,
-            0xd,
-            0x1,
-            'Kỷ\x20Dậu'
-        ],
-        [
-            0x7ed,
-            0x3,
-            0xf,
-            0x2,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0x4,
-            0xd,
-            0x3,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0x5,
-            0xd,
-            0x4,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0x6,
-            0xb,
-            0x5,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0x7,
-            0xb,
-            0x6,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0x8,
-            0xa,
-            0x7,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0x9,
-            0x8,
-            0x8,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0xa,
-            0x8,
-            0x9,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ed,
-            0xb,
-            0x7,
-            0xa,
-            'Kỷ\x20Dậu'
-        ],
-        [
-            0x7ee,
-            0x0,
-            0x6,
-            0xb,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ee,
-            0x1,
-            0x5,
-            0xc,
-            _0x1e4df6(0x23e)
-        ],
-        [
-            0x7ee,
-            0x2,
-            0x3,
-            0x1,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x3,
-            0x5,
-            0x2,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x4,
-            0x3,
-            0x3,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x5,
-            0x2,
-            0x4,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x6,
-            0x1,
-            0x5,
-            'Canh\x20Tuất'
-        ],
-        [
-            0x7ee,
-            0x6,
-            0x1e,
-            0x6,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x7,
-            0x1e,
-            0x7,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x8,
-            0x1d,
-            0x8,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0x9,
-            0x1b,
-            0x9,
-            'Canh\x20Tuất'
-        ],
-        [
-            0x7ee,
-            0xa,
-            0x1b,
-            0xa,
-            _0x1e4df6(0x216)
-        ],
-        [
-            0x7ee,
-            0xb,
-            0x1a,
-            0xb,
-            _0x1e4df6(0x216)
-        ]
-    ];
-function getEnvColor(_0x29f23b, _0x3b5642) {
-    var _0x277e17 = _0x1e4df6, _0x3926d1 = String(_0x3b5642);
-    if (_0x3926d1 === '--' || _0x3926d1[_0x277e17(0x134)]('--') !== -0x1)
-        return _0x277e17(0x1f1);
-    var _0xdb4740 = parseFloat(_0x3926d1);
-    if (_0x29f23b === _0x277e17(0x178)) {
-        if (_0xdb4740 <= 0x32)
-            return '#ffffff';
-        if (_0xdb4740 <= 0x64)
-            return _0x277e17(0x230);
-        if (_0xdb4740 <= 0x96)
-            return '#FF9500';
-        return _0x277e17(0x1d8);
-    }
-    if (_0x29f23b === 'uv') {
-        if (_0xdb4740 <= 0x2)
-            return _0x277e17(0x1f1);
-        if (_0xdb4740 <= 0x5)
-            return '#F4B41A';
-        if (_0xdb4740 <= 0x7)
-            return '#FF9500';
-        return '#FF3366';
-    }
-    if (_0x29f23b === _0x277e17(0x258)) {
-        if (_0xdb4740 < 0x33)
-            return _0x277e17(0x1f1);
-        if (_0xdb4740 <= 0x4b)
-            return _0x277e17(0x230);
-        return '#FF3366';
-    }
-    return _0x277e17(0x1f1);
-}
-function syncEnvWidth() {
-    setTimeout(function () {
-        var _0x1a7f5c = _0x4a05, _0x23f087 = document[_0x1a7f5c(0x233)](_0x1a7f5c(0x179)), _0x3a1819 = document[_0x1a7f5c(0x1b6)]('.env-rotating-item');
-        if (_0x23f087 && _0x3a1819) {
-            var _0x206e92 = _0x23f087[_0x1a7f5c(0x218)]()[_0x1a7f5c(0x183)];
-            if (_0x206e92 > 0x0) {
-                _0x3a1819[_0x1a7f5c(0x20c)][_0x1a7f5c(0x183)] = _0x206e92 + 'px', _0x3a1819['style']['display'] = _0x1a7f5c(0x21c), _0x3a1819['style'][_0x1a7f5c(0x1f4)] = _0x1a7f5c(0x181), _0x3a1819[_0x1a7f5c(0x20c)][_0x1a7f5c(0x257)] = _0x1a7f5c(0x181);
-                var _0x560e04 = 1.1;
-                _0x3a1819[_0x1a7f5c(0x20c)][_0x1a7f5c(0x21e)] = _0x560e04 + 'rem';
-                while (_0x3a1819[_0x1a7f5c(0x222)] > _0x3a1819[_0x1a7f5c(0x176)] && _0x560e04 > 0.4) {
-                    _0x560e04 -= 0.05, _0x3a1819[_0x1a7f5c(0x20c)][_0x1a7f5c(0x21e)] = _0x560e04 + _0x1a7f5c(0x1dc);
-                }
-            }
-        }
-    }, 0x32);
-}
-function rotateWeatherDisplay() {
-    var _0x67d1ed = _0x1e4df6, _0x149dc5 = [
-            'AQI\x20<span\x20style=\x22color:' + getEnvColor(_0x67d1ed(0x178), globalAQI) + _0x67d1ed(0x163) + globalAQI + _0x67d1ed(0x15b),
-            _0x67d1ed(0x15c) + getEnvColor('uv', globalUV) + _0x67d1ed(0x163) + globalUV + _0x67d1ed(0x15b),
-            _0x67d1ed(0x215) + getEnvColor('rain', parseFloat(globalRain)) + _0x67d1ed(0x163) + globalRain + _0x67d1ed(0x15b),
-            '💧\x20' + globalHum,
-            '🌅\x20' + globalSunrise + '-' + globalSunset
-        ], _0x468958 = _0x149dc5[envDisplayIndex % _0x149dc5[_0x67d1ed(0x156)]];
-    envDisplayIndex++;
-    var _0x2c4a2a = document[_0x67d1ed(0x233)](_0x67d1ed(0x1fa));
-    _0x2c4a2a && (_0x2c4a2a[_0x67d1ed(0x1e3)] = '<div\x20class=\x22env-rotating-item\x22>' + _0x468958 + '</div>', syncEnvWidth());
-}
-setInterval(rotateWeatherDisplay, 0x1d4c0);
-function fetchConfigFromDrive() {
-    var _0x126933 = _0x1e4df6, _0xc1508d = encodeURIComponent('\x27' + FOLDER_ID + '\x27\x20in\x20parents\x20and\x20name\x20=\x20\x27cauhinh.txt\x27\x20and\x20trashed\x20=\x20false'), _0x3a17f5 = _0x126933(0x242) + _0xc1508d + _0x126933(0x198) + API_KEY + '&fields=files(id)', _0x5dec59 = new XMLHttpRequest();
-    _0x5dec59['open'](_0x126933(0x1cc), _0x3a17f5, !![]), _0x5dec59[_0x126933(0x159)] = function () {
-        var _0x293026 = _0x126933;
-        if (_0x5dec59[_0x293026(0x249)] === 0x4 && _0x5dec59[_0x293026(0x1a7)] === 0xc8) {
-            var _0x1ea569 = JSON[_0x293026(0x251)](_0x5dec59[_0x293026(0x18a)]);
-            _0x1ea569[_0x293026(0x193)] && _0x1ea569['files'][_0x293026(0x156)] > 0x0 && downloadConfigFile(_0x1ea569[_0x293026(0x193)][0x0]['id']);
-        }
-    }, _0x5dec59[_0x126933(0x1d0)]();
-}
-function _0x488f() {
-    var _0x545be7 = [
-        'night',
-        '🎂\x20Chúc\x20mừng\x20Sinh\x20Nhật\x20',
-        '[NGAY\x20LE\x20TON\x20GIAO]',
-        '#ffffff',
-        'outer-blur-bg',
-        'innerText',
-        'justifyContent',
-        'trim',
-        'fg1',
-        'DANH\x20SÁCH\x20SINH\x20NHẬT',
-        'translate(',
-        'fit-cover',
-        'right-env-container',
-        'night-active',
-        '.slide-group.active\x20.background-blur',
-        '834764YgyRwS',
-        'push',
-        'preventDefault',
-        'wakeUpHour',
-        'us_aqi',
-        'setItem',
-        'px)',
-        'toast-msg',
-        'Th\x207',
-        '\x20ngày)',
-        'bottom-left-events',
-        'Hôm\x20nay:\x20',
-        'Nhà\x20là\x20nơi\x20bão\x20dừng\x20sau\x20cánh\x20cửa,\x20nơi\x20bình\x20yên\x20ấm\x20áp\x20nhất\x20để\x20trở\x20về.',
-        '<span\x20class=\x22countdown-highlight\x22>',
-        'opacity',
-        'style',
-        'getMinutes',
-        '🌙\x20Chúc\x20ngủ\x20ngon!',
-        '🌅\x20Cài\x20chuyển\x20Sáng:\x20',
-        '1987156VDdeui',
-        '#B4E61D',
-        'innerHeight',
-        '/30',
-        'pm2_5',
-        '🌧️\x20<span\x20style=\x22color:',
-        'Canh\x20Tuất',
-        'sunset',
-        'getBoundingClientRect',
-        'show_birth',
-        '<span\x20class=\x22highlight-yellow\x22>AL</span>\x20',
-        'defaultLocation',
-        'flex',
-        '#00E5FF',
-        'fontSize',
-        'night-min-node',
-        'match',
-        'getItem',
-        'scrollWidth',
-        '#FF9100',
-        '\x27Cinzel\x27,\x20serif',
-        'toUpperCase',
-        'toFixed',
-        'Th\x203',
-        'open',
-        '\x0a\x20\x20\x20\x20*\x20{\x20box-sizing:\x20border-box;\x20margin:\x200;\x20padding:\x200;\x20user-select:\x20none;\x20-webkit-user-select:\x20none;\x20}\x0a\x20\x20\x20\x20body,\x20html\x20{\x20width:\x20100%;\x20height:\x20100%;\x20overflow:\x20hidden;\x20background-color:\x20#000000;\x20font-family:\x20-apple-system,\x20BlinkMacSystemFont,\x20\x22Segoe\x20UI\x22,\x20Roboto,\x20sans-serif;\x20cursor:\x20pointer;\x20}\x0a\x20\x20\x20\x20#outer-blur-bg\x20{\x20position:\x20fixed;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20object-fit:\x20cover;\x20filter:\x20blur(45px)\x20brightness(0.6);\x20z-index:\x200;\x20transform:\x20scale(1.2);\x20}\x0a\x20\x20\x20\x20#white-border-bg\x20{\x20position:\x20fixed;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20background-color:\x20#ffffff;\x20z-index:\x201;\x20transition:\x20opacity\x201.5s\x20ease-in-out;\x20}\x0a\x20\x20\x20\x20#frame-wrapper\x20{\x20position:\x20absolute;\x20top:\x2045px;\x20bottom:\x2045px;\x20left:\x2045px;\x20right:\x2045px;\x20background-color:\x20#000;\x20overflow:\x20hidden;\x20box-shadow:\x200px\x2015px\x2045px\x20rgba(0,\x200,\x200,\x200.15),\x20inset\x200px\x200px\x2030px\x20rgba(0,0,0,0.85);\x20border:\x201px\x20solid\x20#eaeaea;\x20transition:\x20all\x200.5s\x20ease;\x20z-index:\x205;\x20}\x0a\x20\x20\x20\x20#photo-container,\x20.slide-group\x20{\x20position:\x20absolute;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20}\x0a\x20\x20\x20\x20#photo-container\x20{\x20z-index:\x201;\x20}\x0a\x20\x20\x20\x20.slide-group\x20{\x20opacity:\x200;\x20transition:\x20opacity\x203s\x20ease-in-out;\x20display:\x20block;\x20}\x0a\x20\x20\x20\x20.slide-group.active\x20{\x20opacity:\x201;\x20z-index:\x202;\x20}\x0a\x20\x20\x20\x20.background-blur\x20{\x20position:\x20absolute;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20object-fit:\x20cover\x20!important;\x20filter:\x20blur(40px)\x20brightness(0.85);\x20-webkit-filter:\x20blur(40px)\x20brightness(0.85);\x20transform:\x20scale(1.3);\x20z-index:\x201;\x20display:\x20none;\x20}\x0a\x20\x20\x20\x20.foreground-image\x20{\x20position:\x20absolute;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20z-index:\x202;\x20flex-shrink:\x200;\x20filter:\x20drop-shadow(0px\x2015px\x2035px\x20rgba(0,0,0,0.6));\x20-webkit-filter:\x20drop-shadow(0px\x2015px\x2035px\x20rgba(0,0,0,0.6));\x20transition:\x20all\x200.5s\x20ease;\x20}\x0a\x20\x20\x20\x20.slide-group.show-blur\x20.background-blur\x20{\x20display:\x20block;\x20}\x0a\x20\x20\x20\x20.fit-cover\x20{\x20object-fit:\x20cover\x20!important;\x20width:\x20100%\x20!important;\x20height:\x20100%\x20!important;\x20}\x0a\x20\x20\x20\x20.fit-contain\x20{\x20object-fit:\x20contain\x20!important;\x20width:\x20100%\x20!important;\x20height:\x20100%\x20!important;\x20}\x0a\x20\x20\x20\x20.overlay\x20{\x20position:\x20absolute;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20background:\x20rgba(0,\x200,\x200,\x200.15);\x20z-index:\x203;\x20pointer-events:\x20none;\x20}\x0a\x20\x20\x20\x20#brightness-overlay\x20{\x20position:\x20absolute;\x20top:\x200;\x20left:\x200;\x20width:\x20100%;\x20height:\x20100%;\x20background:\x20rgba(0,\x200,\x200,\x200);\x20z-index:\x20998;\x20pointer-events:\x20none;\x20transition:\x20background\x200.5s\x20ease;\x20}\x0a\x20\x20\x20\x20.tap-target\x20{\x20-webkit-tap-highlight-color:\x20transparent;\x20outline:\x20none;\x20border:\x20none;\x20background:\x20transparent;\x20cursor:\x20pointer;\x20transition:\x20opacity\x200.2s;\x20}\x0a\x20\x20\x20\x20.tap-target:active\x20{\x20opacity:\x200.6;\x20}\x0a\x20\x20\x20\x20#info-container\x20{\x20position:\x20absolute;\x20top:\x2035px;\x20left:\x2035px;\x20z-index:\x204;\x20text-shadow:\x200px\x202px\x208px\x20rgba(0,\x200,\x200,\x200.6);\x20display:\x20flex;\x20flex-direction:\x20column;\x20align-items:\x20center;\x20width:\x20auto;\x20transition:\x20transform\x202s\x20ease-in-out;\x20}\x0a\x20\x20\x20\x20#clock-flex-wrapper\x20{\x20display:\x20flex;\x20flex-direction:\x20column;\x20align-items:\x20center;\x20width:\x20100%;\x20margin-left:\x200;\x20}\x0a\x20\x20\x20\x20.hours-style,\x20.minutes-style\x20{\x20font-family:\x20\x27Montserrat\x27,\x20sans-serif;\x20font-weight:\x20700;\x20font-size:\x206.5rem;\x20letter-spacing:\x20-2px;\x20display:\x20block;\x20line-height:\x200.85;\x20transition:\x20color\x200.5s,\x20font-family\x200.5s;\x20width:\x20100%;\x20text-align:\x20center;\x20margin-left:\x200;\x20}\x20\x0a\x20\x20\x20\x20.hours-style\x20{\x20color:\x20#F4B41A;\x20}\x20.minutes-style\x20{\x20color:\x20#ffffff;\x20margin-top:\x204px;\x20}\x0a\x20\x20\x20\x20#date-solar-top\x20{\x20font-size:\x201.4rem;\x20font-weight:\x20700;\x20color:\x20#ffffff;\x20margin-top:\x2014px;\x20white-space:\x20nowrap;\x20text-align:\x20center;\x20}\x0a\x20\x20\x20\x20#date-lunar-top\x20{\x20font-size:\x201.4rem;\x20font-weight:\x20700;\x20color:\x20#ffffff;\x20margin-top:\x204px;\x20white-space:\x20nowrap;\x20text-align:\x20center;\x20}\x0a\x20\x20\x20\x20.highlight-yellow\x20{\x20color:\x20#F4B41A;\x20font-weight:\x20700;\x20}\x0a\x20\x20\x20\x20#top-right-wrapper\x20{\x20position:\x20absolute;\x20top:\x2035px;\x20right:\x2045px;\x20z-index:\x204;\x20display:\x20flex;\x20flex-direction:\x20column;\x20align-items:\x20center;\x20gap:\x208px;\x20text-shadow:\x200px\x202px\x205px\x20rgba(0,0,0,0.6);\x20transition:\x20transform\x202s\x20ease-in-out;\x20}\x0a\x20\x20\x20\x20#right-env-container\x20{\x20display:\x20flex;\x20flex-direction:\x20column;\x20align-items:\x20center;\x20margin-right:\x200;\x20width:\x20auto;\x20}\x0a\x20\x20\x20\x20.env-rotating-item\x20{\x20padding:\x200;\x20background:\x20transparent;\x20white-space:\x20nowrap;\x20transition:\x20opacity\x200.5s\x20ease;\x20color:\x20rgba(255,\x20255,\x20255,\x200.95);\x20font-weight:\x20600;\x20text-align:\x20center;\x20display:\x20flex;\x20justify-content:\x20center;\x20align-items:\x20center;}\x0a\x20\x20\x20\x20#temp-wrapper\x20{\x20position:\x20relative;\x20display:\x20inline-flex;\x20align-items:\x20flex-start;\x20justify-content:\x20center;\x20flex-shrink:\x200;\x20margin-left:\x200;\x20text-align:\x20center;\x20margin-right:\x200;\x20width:\x20auto;\x20}\x20\x0a\x20\x20\x20\x20#weather-val\x20{\x20font-family:\x20\x27Montserrat\x27,\x20sans-serif;\x20font-weight:\x20700;\x20color:\x20#ffffff;\x20letter-spacing:\x20-2px;\x20line-height:\x200.8;\x20font-size:\x203.8rem;\x20display:\x20inline-block;\x20}\x0a\x20\x20\x20\x20.degree-symbol\x20{\x20position:\x20absolute;\x20font-weight:\x20700;\x20color:\x20#ffffff;\x20font-size:\x201.5rem;\x20top:\x200;\x20right:\x20-18px;\x20}\x0a\x20\x20\x20\x20@-webkit-keyframes\x20pulseGlow\x20{\x200%\x20{\x20opacity:\x200.8;\x20}\x2050%\x20{\x20opacity:\x201;\x20}\x20100%\x20{\x20opacity:\x200.8;\x20}\x20}\x0a\x20\x20\x20\x20@keyframes\x20pulseGlow\x20{\x200%\x20{\x20opacity:\x200.8;\x20}\x2050%\x20{\x20opacity:\x201;\x20}\x20100%\x20{\x20opacity:\x200.8;\x20}\x20}\x0a\x20\x20\x20\x20#bottom-container\x20{\x20position:\x20absolute;\x20bottom:\x2035px;\x20left:\x2035px;\x20right:\x2035px;\x20z-index:\x204;\x20display:\x20flex;\x20flex-direction:\x20row;\x20align-items:\x20flex-end;\x20justify-content:\x20space-between;\x20text-shadow:\x200px\x202px\x208px\x20rgba(0,\x200,\x200,\x200.7);\x20gap:\x2030px;\x20transition:\x20transform\x202s\x20ease-in-out;\x20}\x0a\x20\x20\x20\x20#bottom-left-events\x20{\x20display:\x20flex;\x20flex-direction:\x20column;\x20align-items:\x20flex-start;\x20gap:\x203px;\x20flex-shrink:\x200;\x20}\x0a\x20\x20\x20\x20.event-header\x20{\x20font-size:\x201.1rem;\x20color:\x20#F4B41A;\x20font-weight:\x20700;\x20text-align:\x20left;\x20text-transform:\x20uppercase;\x20letter-spacing:\x201px;\x20margin-bottom:\x202px;\x20cursor:\x20pointer;\x20}\x0a\x20\x20\x20\x20.event-item\x20{\x20font-size:\x201.15rem;\x20color:\x20rgba(255,\x20255,\x20255,\x200.95);\x20font-weight:\x20600;\x20text-align:\x20left;\x20padding:\x204px\x2012px;\x20border-radius:\x204px;\x20background:\x20rgba(0,\x200,\x200,\x200.4);\x20margin-bottom:\x202px;\x20display:\x20inline-block;}\x0a\x20\x20\x20\x20.event-passed\x20{\x20opacity:\x200.35;\x20font-size:\x201rem;\x20}\x0a\x20\x20\x20\x20.event-urgent\x20{\x20color:\x20#F4B41A\x20!important;\x20font-weight:\x20700;\x20background:\x20rgba(0,\x200,\x200,\x200.7);\x20-webkit-animation:\x20pulseGlow\x202s\x20infinite;\x20animation:\x20pulseGlow\x202s\x20infinite;\x20}\x0a\x20\x20\x20\x20.event-today-birth\x20{\x20color:\x20#2ecc71\x20!important;\x20font-weight:\x20700;\x20font-size:\x201.25rem;\x20background:\x20rgba(0,\x200,\x200,\x200.8);\x20}\x0a\x20\x20\x20\x20#bottom-right-text\x20{\x20flex:\x201;\x20display:\x20flex;\x20flex-direction:\x20column;\x20align-items:\x20flex-end;\x20justify-content:\x20flex-end;\x20text-align:\x20right;\x20margin-left:\x2030px;\x20cursor:\x20pointer;\x20}\x0a\x20\x20\x20\x20#quote-row\x20{\x20font-size:\x201.15rem;\x20font-weight:\x20500;\x20font-style:\x20normal;\x20color:\x20#f5f5f7;\x20line-height:\x201.5;\x20word-wrap:\x20break-word;\x20text-align:\x20right;\x20width:\x20100%;\x20}\x0a\x20\x20\x20\x20.countdown-highlight\x20{\x20color:\x20#F4B41A;\x20font-weight:\x20700;\x20}\x0a\x20\x20\x20\x20.death-highlight\x20{\x20color:\x20#ff9500;\x20font-weight:\x20700;\x20}\x0a\x20\x20\x20\x20.death-event-passed\x20{\x20color:\x20#a1a1a1;\x20font-weight:\x20500;\x20opacity:\x200.6;\x20}\x0a\x20\x20\x20\x20.modal-base\x20{\x20position:\x20absolute;\x20top:\x2050%;\x20left:\x2050%;\x20transform:\x20translate(-50%,\x20-50%);\x20background:\x20rgba(0,\x200,\x200,\x200.9);\x20backdrop-filter:\x20blur(15px);\x20padding:\x2025px;\x20border-radius:\x2016px;\x20border:\x201px\x20solid\x20#F4B41A;\x20z-index:\x2010001;\x20display:\x20none;\x20flex-direction:\x20column;\x20gap:\x2015px;\x20width:\x20340px;\x20box-shadow:\x200px\x2010px\x2040px\x20rgba(0,0,0,0.8);\x20}\x0a\x20\x20\x20\x20.show-modal\x20{\x20display:\x20flex\x20!important;\x20}\x0a\x20\x20\x20\x20.modal-title\x20{\x20color:\x20#F4B41A;\x20font-weight:\x20700;\x20font-size:\x201.3rem;\x20text-align:\x20center;\x20margin-bottom:\x205px;\x20text-transform:\x20uppercase;\x20letter-spacing:\x201px;\x20}\x0a\x20\x20\x20\x20.list-item\x20{\x20color:\x20#fff;\x20padding:\x2010px\x205px;\x20border-bottom:\x201px\x20solid\x20rgba(255,255,255,0.15);\x20font-size:\x201.1rem;\x20font-weight:\x20500;\x20text-align:\x20left;}\x0a\x20\x20\x20\x20.list-item:last-child\x20{\x20border-bottom:\x20none;\x20}\x0a\x20\x20\x20\x20#list-content\x20{\x20overflow-y:\x20auto;\x20max-height:\x20350px;\x20padding-right:\x2010px;\x20}\x0a\x20\x20\x20\x20.loc-input\x20{\x20background:\x20rgba(255,255,255,0.1);\x20border:\x201px\x20solid\x20rgba(255,255,255,0.3);\x20color:\x20#fff;\x20padding:\x2012px\x2015px;\x20border-radius:\x208px;\x20font-size:\x201.05rem;\x20width:\x20100%;\x20outline:\x20none;\x20font-family:\x20inherit;\x20font-weight:\x20500;}\x0a\x20\x20\x20\x20.loc-input::placeholder\x20{\x20color:\x20#aaa;\x20font-weight:\x20400;\x20}\x0a\x20\x20\x20\x20.loc-input:focus\x20{\x20border-color:\x20#F4B41A;\x20background:\x20rgba(255,255,255,0.15);\x20}\x0a\x20\x20\x20\x20.loc-btns\x20{\x20display:\x20flex;\x20gap:\x2010px;\x20margin-top:\x205px;\x20}\x0a\x20\x20\x20\x20.loc-btn\x20{\x20flex:\x201;\x20padding:\x2012px;\x20font-weight:\x20700;\x20border-radius:\x208px;\x20cursor:\x20pointer;\x20border:\x20none;\x20font-size:\x201rem;\x20transition:\x20transform\x200.1s;}\x0a\x20\x20\x20\x20.loc-btn:active\x20{\x20transform:\x20scale(0.95);\x20}\x0a\x20\x20\x20\x20.btn-save\x20{\x20background:\x20#F4B41A;\x20color:\x20#000;\x20}\x0a\x20\x20\x20\x20.btn-default\x20{\x20background:\x20transparent;\x20color:\x20#fff;\x20border:\x201px\x20solid\x20#fff;\x20}\x0a\x20\x20\x20\x20.btn-close-modal\x20{\x20background:\x20transparent;\x20color:\x20#aaa;\x20font-weight:\x20400;\x20border:\x20none;\x20font-size:\x200.95rem;\x20text-align:\x20center;\x20margin-top:\x20-5px;\x20padding:\x205px;\x20cursor:\x20pointer;\x20}\x0a\x20\x20\x20\x20#toast-msg\x20{\x20position:\x20absolute;\x20top:\x2015%;\x20left:\x2050%;\x20transform:\x20translateX(-50%);\x20background:\x20rgba(0,\x200,\x200,\x200.85);\x20color:\x20#F4B41A;\x20border:\x201px\x20solid\x20#F4B41A;\x20padding:\x2012px\x2024px;\x20border-radius:\x208px;\x20font-size:\x201.2rem;\x20font-weight:\x20700;\x20z-index:\x2010000;\x20opacity:\x200;\x20pointer-events:\x20none;\x20transition:\x20opacity\x200.5s\x20ease;\x20text-align:\x20center;\x20box-shadow:\x200px\x204px\x2015px\x20rgba(0,0,0,0.5);\x20}\x0a\x20\x20\x20\x20#toast-msg.show\x20{\x20opacity:\x201;\x20}\x0a\x20\x20\x20\x20#night-clock-box\x20{\x20position:\x20absolute;\x20left:\x2050%;\x20top:\x2050%;\x20transform:\x20translate(-50%,\x20-50%);\x20display:\x20none;\x20z-index:\x204;\x20text-shadow:\x20none;\x20transition:\x20transform\x202s\x20ease-in-out;\x20}\x0a\x20\x20\x20\x20.night-active\x20#white-border-bg\x20{\x20background-color:\x20#000000\x20!important;\x20opacity:\x201\x20!important;\x20}\x20\x0a\x20\x20\x20\x20.night-active\x20#photo-container,\x20.night-active\x20#bottom-container,\x20.night-active\x20#top-right-wrapper,\x20.night-active\x20#info-container\x20{\x20display:\x20none\x20!important;\x20}\x0a\x20\x20\x20\x20.night-active\x20#frame-wrapper\x20{\x20background-color:\x20transparent\x20!important;\x20box-shadow:\x20none\x20!important;\x20border-color:\x20transparent\x20!important;\x20}\x0a\x20\x20\x20\x20.night-active\x20#night-clock-box\x20{\x20display:\x20flex;\x20align-items:\x20center;\x20justify-content:\x20center;\x20flex-direction:\x20row;\x20}\x0a\x20\x20\x20\x20.night-hours,\x20.night-minutes\x20{\x20font-family:\x20\x27Tourney\x27,\x20cursive\x20!important;\x20font-weight:\x20600\x20!important;\x20color:\x20#FF9500\x20!important;\x20font-size:\x2046vmin;\x20line-height:\x200.9;\x20margin:\x200\x201vmin;\x20letter-spacing:\x20-2vmin;\x20}\x0a\x20\x20\x20\x20@media\x20(orientation:\x20portrait)\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20.hours-style,\x20.minutes-style\x20{\x20font-size:\x207.5rem;\x20text-align:\x20center;\x20}\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20#date-solar-top\x20{\x20font-size:\x201.6rem;\x20text-align:\x20center;\x20}\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20#date-lunar-top\x20{\x20font-size:\x201.6rem;\x20text-align:\x20center;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20#bottom-container\x20{\x20flex-direction:\x20column;\x20align-items:\x20stretch;\x20gap:\x2015px;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20#bottom-left-events\x20{\x20align-items:\x20flex-start;\x20max-width:\x20100%;\x20width:\x20100%;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20#bottom-right-text\x20{\x20text-align:\x20right;\x20align-items:\x20flex-end;\x20margin-left:\x200;\x20width:\x20100%;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20#quote-row\x20{\x20font-size:\x201.15rem;\x20line-height:\x201.45;\x20text-align:\x20right;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20.night-active\x20#night-clock-box\x20{\x20flex-direction:\x20column;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20.night-hours,\x20.night-minutes\x20{\x20font-size:\x2042vmin;\x20margin:\x200;\x20line-height:\x200.85;\x20letter-spacing:\x20-2vmin;\x20}\x0a\x20\x20\x20\x20}\x0a',
-        '\x20event-passed',
-        '\x20ngày\x20đến\x20',
-        'replace',
-        'px),\x20calc(-50%\x20+\x20',
-        '</div>',
-        '\x20ÂL)',
-        '#F4B41A',
-        'birth',
-        '[LE\x20HOI\x20VIET\x20NAM]',
-        'getElementById',
-        '[DANH\x20SACH\x20SINH\x20NHAT]',
-        '\x20<span\x20style=\x22color:#ffffff;\x20font-weight:400;\x22>|</span>\x20',
-        '\x20(Hôm\x20nay!)',
-        'body',
-        'loc-lat',
-        'suspended',
-        '&fields=files(id)',
-        'split',
-        'hr-node',
-        '&fields=files(id,createdTime)',
-        'Kỷ\x20Dậu',
-        'innerWidth',
-        '\x27Tourney\x27,\x20cursive',
-        'location-modal',
-        'https://www.googleapis.com/drive/v3/files?q=',
-        '#E0E0E0',
-        'text',
-        'clock',
-        '<span\x20class=\x22highlight-yellow\x22>',
-        '\x27\x20in\x20parents\x20and\x20name\x20=\x20\x27cauhinh.txt\x27\x20and\x20trashed\x20=\x20false',
-        'getSeconds',
-        'readyState',
-        'loc-name',
-        '<div\x20class=\x22event-header\x20tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27chime\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27chime\x27)\x22>SINH\x20NHẬT</div>',
-        '\x20(Còn\x20',
-        'night-clock-box',
-        'Mạng\x20chập\x20chờn.\x20Đang\x20lấy\x20lại\x20ảnh\x20dự\x20phòng...',
-        '05:24',
-        '[KHO\x20DANH\x20NGON\x20CUOC\x20SONG]',
-        'parse',
-        '3567CckTUc',
-        'fit-contain',
-        '82422GqEvex',
-        'load',
-        'top-right-wrapper',
-        'alignItems',
-        'rain',
-        'sunrise',
-        '176onhnJh',
-        'indexOf',
-        '1347829gYuiDk',
-        'show-modal',
-        'Hôm\x20nay\x20',
-        '0.5',
-        'uv_index',
-        '75%',
-        'color',
-        'Th\x204',
-        'random',
-        'getMonth',
-        '<span\x20class=\x22death-event-passed\x22>',
-        'white-border-bg',
-        'closeListModal',
-        'next',
-        'Còn\x20',
-        'round',
-        '🔔\x20Thử\x20chuông\x20báo',
-        'show_death',
-        '8zUpvQu',
-        'Th\x202',
-        'VI_DO',
-        'date-solar-top',
-        'forEach',
-        '[LE\x20HOI\x20VA\x20NGAY\x20LE\x20TON\x20GIAO]',
-        'fg2',
-        'appendChild',
-        'bottom-right-text',
-        '6.8',
-        '&sz=w2048',
-        'active',
-        'onload',
-        'https://www.googleapis.com/drive/v3/files/',
-        'add',
-        'length',
-        'show-blur',
-        'wakeup',
-        'onreadystatechange',
-        'getTime',
-        '</span>',
-        '☀️\x20<span\x20style=\x22color:',
-        'fontWeight',
-        'rgba(0,0,0,0)',
-        '&longitude=',
-        'Đang\x20đổi\x20ảnh...',
-        'myName',
-        'Giỗ\x20',
-        ';\x20font-weight:700;\x22>',
-        'currentTime',
-        'type',
-        'slice',
-        'src',
-        'triangle',
-        'setValueAtTime',
-        'value',
-        'createdTime',
-        'sort',
-        'rgba(0,0,0,0.5)',
-        '\x27Courier\x20Prime\x27,\x20monospace',
-        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=',
-        'webkitAudioContext',
-        'KINH_DO',
-        'remove',
-        ':00',
-        'Mậu\x20Thân',
-        'text/plain;\x20charset=utf-8',
-        'clientWidth',
-        '<span\x20class=\x22death-highlight\x22>',
-        'aqi',
-        'weather-val',
-        'precipitation_probability',
-        'substring',
-        'sine',
-        'interval',
-        '40%',
-        'Lỗi\x20kết\x20nối\x20hoặc\x20sai\x20ID\x20thư\x20mục.',
-        '[KHO\x20DANH\x20NGON\x20CUOC\x20LIFE]',
-        'center',
-        'open_location',
-        'width',
-        'group2',
-        'timeout',
-        'head',
-        'naturalWidth',
-        '📍\x20Đã\x20lưu\x20vị\x20trí:\x20',
-        'clockStyle',
-        'responseText',
-        '1.0',
-        '<br>',
-        'start',
-        '&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,uv_index&daily=sunrise,sunset&timezone=Asia%2FHo_Chi_Minh&forecast_days=1&_cb=',
-        'list-modal',
-        'AudioContext',
-        'overrideMimeType',
-        'saveLocation',
-        'files',
-        '18:12',
-        '148205pxnwJU',
-        'getHours',
-        'Thư\x20mục\x20trống!\x20Vui\x20lòng\x20tải\x20ảnh\x20lên\x20Drive.',
-        '&key=',
-        'death',
-        'date-lunar-top',
-        'Ất\x20Tỵ',
-        '\x27Playfair\x20Display\x27,\x20serif',
-        '&pageSize=1000&key=',
-        'https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048&auto=format&fit=crop',
-        'background',
-        'name',
-        'contains',
-        '\x27Righteous\x27,\x20cursive',
-        'loc-lon',
-        'px,\x20',
-        'unsplash.com',
-        'now',
-        'status',
-        'quote-row',
-        'resize',
-        '10%',
-        'createOscillator',
-        'Bính\x20Ngọ',
-        'floor',
-        'Vui\x20lòng\x20nhập\x20tọa\x20độ\x20bằng\x20số!',
-        '1030aRejcD',
-        '216PJpoXv',
-        '\x20event-today-birth',
-        'Tân\x20Lập',
-        'createElement',
-        'offsetHeight',
-        '\x20Phút',
-        'querySelector',
-        '<div\x20class=\x22',
-        '✨\x20Phong\x20cách:\x20',
-        '65940HSBuLw',
-        'myLat',
-        'Th\x205',
-        'min-node',
-        'connect',
-        '[DAC\x20SAN\x20THEO\x20MUA]',
-        'brightness-overlay',
-        '473m',
-        '\x27Oswald\x27,\x20sans-serif',
-        'getDate',
-        'naturalHeight',
-        'addEventListener',
-        '<div\x20class=\x22list-item\x22>',
-        '\x27Montserrat\x27,\x20sans-serif',
-        'stopPropagation',
-        'transform',
-        'getDay',
-        '\x20ÂL\x20-\x20',
-        'event-item',
-        'GET',
-        '54AtzDyu',
-        '[THONG\x20TIN\x20QUAN\x20TRONG]',
-        'bg2',
-        'send',
-        'group1',
-        'closeLocationModal',
-        '\x0a\x20\x20\x20\x20<img\x20id=\x22outer-blur-bg\x22\x20src=\x22\x22>\x0a\x20\x20\x20\x20<div\x20id=\x22white-border-bg\x22></div>\x0a\x20\x20\x20\x20<div\x20id=\x22frame-wrapper\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22photo-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22group1\x22\x20class=\x22slide-group\x20active\x22><img\x20id=\x22bg1\x22\x20class=\x22background-blur\x22><img\x20id=\x22fg1\x22\x20class=\x22foreground-image\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22group2\x22\x20class=\x22slide-group\x22><img\x20id=\x22bg2\x22\x20class=\x22background-blur\x22><img\x20id=\x22fg2\x22\x20class=\x22foreground-image\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22overlay\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22brightness-overlay\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22toast-msg\x22>Thông\x20báo</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22info-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22clock-flex-wrapper\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22hours-style\x20tap-target\x22\x20id=\x22hr-node\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27night\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27night\x27)\x22>00</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22minutes-style\x20tap-target\x22\x20id=\x22min-node\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27style\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27style\x27)\x22>00</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22date-solar-top\x22\x20class=\x22tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27wakeup\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27wakeup\x27)\x22>Th\x200\x2000/00</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22date-lunar-top\x22\x20class=\x22tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27interval\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27interval\x27)\x22><span\x20class=\x22highlight-yellow\x22>AL</span>\x2000/00</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22night-clock-box\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22night-hours\x20tap-target\x22\x20id=\x22night-hr-node\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27night\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27night\x27)\x22>00:</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22night-minutes\x20tap-target\x22\x20id=\x22night-min-node\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27night\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27night\x27)\x22>00</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22top-right-wrapper\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22right-env-container\x22\x20class=\x22tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27open_location\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27open_location\x27)\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22temp-wrapper\x22\x20class=\x22tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27next\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27next\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20id=\x22weather-val\x22>--</span><span\x20class=\x22degree-symbol\x22>°</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22bottom-container\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22bottom-left-events\x22\x20class=\x22tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27show_birth\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27show_birth\x27)\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22bottom-right-text\x22\x20class=\x22tap-target\x22\x20ontouchstart=\x22window.handleAction(event,\x20\x27show_death\x27)\x22\x20onclick=\x22window.handleAction(event,\x20\x27show_death\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20id=\x22quote-row\x22>Đang\x20tải\x20và\x20đồng\x20bộ\x20hệ\x20thống\x20dữ\x20liệu\x20điện\x20toán\x20đám\x20mây...</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22location-modal\x22\x20class=\x22modal-base\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22modal-title\x22>CÀI\x20ĐẶT\x20VỊ\x20TRÍ</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22text\x22\x20id=\x22loc-name\x22\x20class=\x22loc-input\x22\x20placeholder=\x22Tên\x20địa\x20phương\x20(VD:\x20Tân\x20Lập)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22text\x22\x20inputmode=\x22decimal\x22\x20id=\x22loc-lat\x22\x20class=\x22loc-input\x22\x20placeholder=\x22Vĩ\x20độ\x20(Chấm\x20hoặc\x20phẩy\x20đều\x20được)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22text\x22\x20inputmode=\x22decimal\x22\x20id=\x22loc-lon\x22\x20class=\x22loc-input\x22\x20placeholder=\x22Kinh\x20độ\x20(VD:\x20108.0694)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22loc-btns\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20class=\x22loc-btn\x20btn-save\x22\x20ontouchstart=\x22window.saveLocation();\x20event.preventDefault();\x22\x20onclick=\x22window.saveLocation()\x22>LƯU</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20class=\x22loc-btn\x20btn-default\x22\x20ontouchstart=\x22window.defaultLocation();\x20event.preventDefault();\x22\x20onclick=\x22window.defaultLocation()\x22>MẶC\x20ĐỊNH</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20class=\x22btn-close-modal\x22\x20ontouchstart=\x22window.closeLocationModal();\x20event.preventDefault();\x22\x20onclick=\x22window.closeLocationModal()\x22>Đóng\x20(Hủy)</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22list-modal\x22\x20class=\x22modal-base\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22list-title\x22\x20class=\x22modal-title\x22>DANH\x20SÁCH</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20id=\x22list-content\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20class=\x22btn-close-modal\x22\x20style=\x22margin-top:10px;\x22\x20ontouchstart=\x22window.closeListModal();\x20event.preventDefault();\x22\x20onclick=\x22window.closeListModal()\x22>Đóng\x20bảng</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20</div>\x0a',
-        'Mùa\x20này\x20',
-        'classList',
-        'daily',
-        'stop',
-        '#FF3366',
-        'night-hr-node',
-        'Đinh\x20Mùi',
-        'bg1',
-        'rem',
-        '📍\x20Đã\x20khôi\x20phục\x20vị\x20trí\x20mặc\x20định',
-        'hourly',
-        'state',
-        'info-container',
-        '18:13',
-        'removeItem',
-        'innerHTML',
-        'show',
-        '8\x20km/h',
-        'myLon',
-        'fontFamily',
-        'temperature_2m',
-        'frequency',
-        'resume',
-        'getComputedStyle',
-        'concat',
-        'list-title'
-    ];
-    _0x488f = function () {
-        return _0x545be7;
-    };
-    return _0x488f();
-}
-function downloadConfigFile(_0x17312e) {
-    var _0x1ff09c = _0x1e4df6, _0xed771e = _0x1ff09c(0x154) + _0x17312e + '?alt=media&key=' + API_KEY, _0x280248 = new XMLHttpRequest();
-    _0x280248[_0x1ff09c(0x228)](_0x1ff09c(0x1cc), _0xed771e, !![]);
-    if (_0x280248[_0x1ff09c(0x191)])
-        _0x280248[_0x1ff09c(0x191)](_0x1ff09c(0x175));
-    _0x280248['onreadystatechange'] = function () {
-        var _0x3e5710 = _0x1ff09c;
-        _0x280248['readyState'] === 0x4 && _0x280248[_0x3e5710(0x1a7)] === 0xc8 && parseConfigText(_0x280248['responseText']);
-    }, _0x280248[_0x1ff09c(0x1d0)]();
-}
-function parseConfigText(_0x186852) {
-    var _0x118bc2 = _0x1e4df6, _0x2c51b9 = _0x186852['split']('\x0a'), _0x1ae6d7 = '', _0x47155d = [], _0x8be670 = [], _0x3afd56 = [], _0x5ccf0f = [], _0x559958 = [];
-    for (var _0x39a9af = 0x0; _0x39a9af < _0x2c51b9[_0x118bc2(0x156)]; _0x39a9af++) {
-        var _0x17f87d = _0x2c51b9[_0x39a9af]['replace']('\x0d', '')[_0x118bc2(0x1f5)]();
-        if (!_0x17f87d || _0x17f87d[_0x118bc2(0x134)]('#') === 0x0)
-            continue;
-        if (_0x17f87d[_0x118bc2(0x134)]('[') === 0x0) {
-            _0x1ae6d7 = _0x17f87d['toUpperCase']();
-            continue;
-        }
-        if (_0x1ae6d7 === _0x118bc2(0x1ce)) {
-            var _0x3ea3ee = _0x17f87d[_0x118bc2(0x23b)]('=');
-            if (_0x3ea3ee[_0x118bc2(0x156)] === 0x2) {
-                var _0x5dd151 = _0x3ea3ee[0x0][_0x118bc2(0x1f5)]()[_0x118bc2(0x225)](), _0x3176a2 = _0x3ea3ee[0x1][_0x118bc2(0x1f5)]();
-                if (_0x5dd151 === _0x118bc2(0x149)) {
-                    if (!localStorage[_0x118bc2(0x221)]('myLat'))
-                        clientLatitude = parseFloat(_0x3176a2[_0x118bc2(0x22c)](',', '.'));
-                    defaultLatitude = parseFloat(_0x3176a2[_0x118bc2(0x22c)](',', '.'));
-                }
-                if (_0x5dd151 === _0x118bc2(0x171)) {
-                    if (!localStorage[_0x118bc2(0x221)](_0x118bc2(0x1e6)))
-                        clientLongitude = parseFloat(_0x3176a2['replace'](',', '.'));
-                    defaultLongitude = parseFloat(_0x3176a2[_0x118bc2(0x22c)](',', '.'));
-                }
-                if (_0x5dd151 === 'TEN_DIA_PHUONG') {
-                    if (!localStorage[_0x118bc2(0x221)]('myName'))
-                        clientLocalName = _0x3176a2;
-                    defaultLocalName = _0x3176a2;
-                }
-            }
-        } else {
-            if (_0x1ae6d7 === _0x118bc2(0x234)) {
-                var _0xbcd8bc = _0x17f87d[_0x118bc2(0x220)](/^(\d{1,2})\s*[\/]\s*(\d{1,2})\s+(.+)$/);
-                if (_0xbcd8bc)
-                    _0x47155d[_0x118bc2(0x1fe)]({
-                        'd': parseInt(_0xbcd8bc[0x1], 0xa),
-                        'm': parseInt(_0xbcd8bc[0x2], 0xa),
-                        'name': _0xbcd8bc[0x3][_0x118bc2(0x1f5)]()
-                    });
-            } else {
-                if (_0x1ae6d7 === '[DANH\x20SACH\x20NGAY\x20GIO]') {
-                    var _0xa89314 = _0x17f87d[_0x118bc2(0x220)](/^(\d{1,2})\s*[\/]\s*(\d{1,2})\s+(.+)$/);
-                    if (_0xa89314)
-                        _0x8be670['push']({
-                            'd': parseInt(_0xa89314[0x1], 0xa),
-                            'm': parseInt(_0xa89314[0x2], 0xa),
-                            'name': _0xa89314[0x3]['trim']()
-                        });
-                } else {
-                    if (_0x1ae6d7 === _0x118bc2(0x232) || _0x1ae6d7 === _0x118bc2(0x1f0) || _0x1ae6d7 === _0x118bc2(0x14c)) {
-                        var _0xc82f3c = _0x17f87d['match'](/^(s|l)\s*[\/]\s*(\d{1,2})\s*[\/]\s*(\d{1,2})\s+(.+)$/i);
-                        if (_0xc82f3c)
-                            _0x3afd56['push']({
-                                'type': _0xc82f3c[0x1]['toLowerCase'](),
-                                'm': parseInt(_0xc82f3c[0x2], 0xa),
-                                'd': parseInt(_0xc82f3c[0x3], 0xa),
-                                'text': _0xc82f3c[0x4][_0x118bc2(0x1f5)]()
-                            });
-                    } else {
-                        if (_0x1ae6d7 === _0x118bc2(0x1be)) {
-                            var _0x14b7a6 = _0x17f87d['match'](/^(\d{1,2})\s+(.+)$/);
-                            if (_0x14b7a6)
-                                _0x5ccf0f[_0x118bc2(0x1fe)]({
-                                    'm': parseInt(_0x14b7a6[0x1], 0xa),
-                                    'text': _0x14b7a6[0x2]['trim']()
-                                });
-                        } else
-                            (_0x1ae6d7 === _0x118bc2(0x180) || _0x1ae6d7 === _0x118bc2(0x250)) && _0x559958['push'](_0x17f87d);
-                    }
-                }
-            }
-        }
-    }
-    if (_0x47155d['length'] > 0x0)
-        birthdays = _0x47155d;
-    if (_0x8be670['length'] > 0x0)
-        anniversaries = _0x8be670;
-    if (_0x3afd56[_0x118bc2(0x156)] > 0x0)
-        festivalsData = _0x3afd56;
-    if (_0x5ccf0f[_0x118bc2(0x156)] > 0x0)
-        specialtiesData = _0x5ccf0f;
-    if (_0x559958[_0x118bc2(0x156)] > 0x0)
-        quotePool = _0x559958;
-    updateWeatherAndAQI(), updateClock(), updateDynamicContentBySlide(), checkForBirthdayMusic(_0x118bc2(0x255));
-}
-function showToast(_0x5dccc4) {
-    var _0x45ca3f = _0x1e4df6, _0xc2a864 = document[_0x45ca3f(0x233)](_0x45ca3f(0x204));
-    _0xc2a864[_0x45ca3f(0x1f3)] = _0x5dccc4, _0xc2a864[_0x45ca3f(0x1d5)][_0x45ca3f(0x155)]('show');
-    if (toastTimeout)
-        clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(function () {
-        var _0x44f3ad = _0x45ca3f;
-        _0xc2a864[_0x44f3ad(0x1d5)][_0x44f3ad(0x172)](_0x44f3ad(0x1e4));
-    }, 0xbb8);
-}
-function applyClockStyle() {
-    var _0xf18b64 = _0x1e4df6, _0x2bd449 = clockStyles[currentStyleIdx], _0x10dfca = document[_0xf18b64(0x233)](_0xf18b64(0x23c)), _0x310d41 = document[_0xf18b64(0x233)](_0xf18b64(0x1bc));
-    _0x10dfca[_0xf18b64(0x20c)][_0xf18b64(0x1e7)] = _0x2bd449['f'], _0x10dfca['style']['color'] = _0x2bd449['hc'], _0x10dfca[_0xf18b64(0x20c)][_0xf18b64(0x15d)] = _0x2bd449['fw'], _0x310d41[_0xf18b64(0x20c)]['fontFamily'] = _0x2bd449['f'], _0x310d41[_0xf18b64(0x20c)][_0xf18b64(0x13b)] = _0x2bd449['mc'], _0x310d41[_0xf18b64(0x20c)][_0xf18b64(0x15d)] = _0x2bd449['fw'], localStorage[_0xf18b64(0x202)](_0xf18b64(0x189), currentStyleIdx);
-}
-function playNote(_0x419f65, _0x2c6943, _0x1544db, _0x5787d8) {
-    var _0x16687e = _0x1e4df6;
-    if (!audioCtx)
-        return;
-    var _0x4f0dee = audioCtx[_0x16687e(0x1ab)](), _0x15f743 = audioCtx['createGain']();
-    _0x4f0dee[_0x16687e(0x165)] = _0x5787d8 || _0x16687e(0x17c), _0x4f0dee[_0x16687e(0x1e9)][_0x16687e(0x169)](_0x419f65, _0x2c6943), _0x15f743['gain'][_0x16687e(0x169)](0.2, _0x2c6943), _0x15f743['gain']['exponentialRampToValueAtTime'](0.001, _0x2c6943 + _0x1544db), _0x4f0dee[_0x16687e(0x1bd)](_0x15f743), _0x15f743[_0x16687e(0x1bd)](audioCtx['destination']), _0x4f0dee[_0x16687e(0x18d)](_0x2c6943), _0x4f0dee[_0x16687e(0x1d7)](_0x2c6943 + _0x1544db);
-}
-function playSolemnChime() {
-    var _0x54249b = _0x1e4df6;
-    if (!audioCtx)
-        try {
-            audioCtx = new (window['AudioContext'] || window[(_0x54249b(0x170))])();
-        } catch (_0x33319f) {
-        }
-    if (audioCtx && audioCtx['state'] === _0x54249b(0x239))
-        audioCtx[_0x54249b(0x1ea)]();
-    var _0x39e7f5 = audioCtx[_0x54249b(0x164)];
-    playNote(0xdc, _0x39e7f5, 3.5, _0x54249b(0x17c)), playNote(0x1b8, _0x39e7f5 + 0.2, 0x3, 'sine'), playNote(554.37, _0x39e7f5 + 0.5, 0x3, 'sine'), playNote(659.25, _0x39e7f5 + 0.8, 0x3, _0x54249b(0x17c)), playNote(0x370, _0x39e7f5 + 1.2, 0x4, _0x54249b(0x17c));
-}
-function playHappyBirthday() {
-    var _0x2bb967 = _0x1e4df6;
-    if (!audioCtx)
-        try {
-            audioCtx = new (window[(_0x2bb967(0x190))] || window[(_0x2bb967(0x170))])();
-        } catch (_0x1bc364) {
-        }
-    if (audioCtx && audioCtx[_0x2bb967(0x1df)] === _0x2bb967(0x239))
-        audioCtx[_0x2bb967(0x1ea)]();
-    var _0x16853b = audioCtx[_0x2bb967(0x164)], _0x16245e = 0.45;
-    function _0x34f31d(_0x932ca2, _0x5f15ca) {
-        var _0x14605a = _0x2bb967;
-        playNote(_0x932ca2, _0x16853b, _0x5f15ca * _0x16245e, _0x14605a(0x168)), _0x16853b += _0x5f15ca * _0x16245e;
-    }
-    _0x34f31d(261.63, 0.75), _0x34f31d(261.63, 0.25), _0x34f31d(293.66, 0x1), _0x34f31d(261.63, 0x1), _0x34f31d(349.23, 0x1), _0x34f31d(329.63, 0x2), _0x34f31d(261.63, 0.75), _0x34f31d(261.63, 0.25), _0x34f31d(293.66, 0x1), _0x34f31d(261.63, 0x1), _0x34f31d(0x188, 0x1), _0x34f31d(349.23, 0x2), _0x34f31d(261.63, 0.75), _0x34f31d(261.63, 0.25), _0x34f31d(523.25, 0x1), _0x34f31d(0x1b8, 0x1), _0x34f31d(349.23, 0x1), _0x34f31d(329.63, 0x1), _0x34f31d(293.66, 0x2), _0x34f31d(466.16, 0.75), _0x34f31d(466.16, 0.25), _0x34f31d(0x1b8, 0x1), _0x34f31d(349.23, 0x1), _0x34f31d(0x188, 0x1), _0x34f31d(349.23, 0x2);
-}
-function _0x4a05(_0x30281c, _0x6f542e) {
-    _0x30281c = _0x30281c - 0x133;
-    var _0x488f5d = _0x488f();
-    var _0x4a05b9 = _0x488f5d[_0x30281c];
-    return _0x4a05b9;
-}
-function openLocationModal() {
-    var _0x24ae22 = _0x1e4df6, _0x240c1e = document['getElementById']('location-modal');
-    document[_0x24ae22(0x233)](_0x24ae22(0x24a))[_0x24ae22(0x16a)] = clientLocalName, document['getElementById'](_0x24ae22(0x238))[_0x24ae22(0x16a)] = clientLatitude, document[_0x24ae22(0x233)]('loc-lon')[_0x24ae22(0x16a)] = clientLongitude, _0x240c1e[_0x24ae22(0x1d5)][_0x24ae22(0x155)](_0x24ae22(0x136));
-    if (locationModalTimeout)
-        clearTimeout(locationModalTimeout);
-    locationModalTimeout = setTimeout(closeLocationModal, 0xea60);
-}
-function closeLocationModal() {
-    var _0x54cc71 = _0x1e4df6;
-    document['getElementById'](_0x54cc71(0x241))['classList']['remove'](_0x54cc71(0x136));
-    if (locationModalTimeout)
-        clearTimeout(locationModalTimeout);
-}
-function saveLocation() {
-    var _0xfcade2 = _0x1e4df6, _0x4d5f19 = document['getElementById'](_0xfcade2(0x24a))[_0xfcade2(0x16a)][_0xfcade2(0x1f5)](), _0x35cd33 = document['getElementById'](_0xfcade2(0x238))[_0xfcade2(0x16a)]['replace'](',', '.'), _0x38a127 = document[_0xfcade2(0x233)](_0xfcade2(0x1a3))[_0xfcade2(0x16a)][_0xfcade2(0x22c)](',', '.'), _0x3e3d43 = parseFloat(_0x35cd33), _0x132568 = parseFloat(_0x38a127);
-    _0x4d5f19 && !isNaN(_0x3e3d43) && !isNaN(_0x132568) ? (closeLocationModal(), clientLocalName = _0x4d5f19, clientLatitude = _0x3e3d43, clientLongitude = _0x132568, localStorage[_0xfcade2(0x202)]('myName', _0x4d5f19), localStorage[_0xfcade2(0x202)](_0xfcade2(0x1ba), _0x3e3d43), localStorage[_0xfcade2(0x202)](_0xfcade2(0x1e6), _0x132568), showToast(_0xfcade2(0x188) + _0x4d5f19), globalAQI = '--', updateWeatherAndAQI(), updateDynamicContentBySlide()) : alert(_0xfcade2(0x1ae));
-}
-function defaultLocation() {
-    var _0x5c8fff = _0x1e4df6;
-    closeLocationModal(), localStorage[_0x5c8fff(0x1e2)](_0x5c8fff(0x161)), localStorage[_0x5c8fff(0x1e2)](_0x5c8fff(0x1ba)), localStorage[_0x5c8fff(0x1e2)](_0x5c8fff(0x1e6)), clientLocalName = defaultLocalName, clientLatitude = defaultLatitude, clientLongitude = defaultLongitude, showToast(_0x5c8fff(0x1dd)), globalAQI = '--', updateWeatherAndAQI(), updateDynamicContentBySlide();
-}
-function showAllLists(_0x42c843) {
-    var _0x5350d9 = _0x1e4df6, _0x16573a = document[_0x5350d9(0x233)](_0x5350d9(0x18f)), _0x4e11c3 = document[_0x5350d9(0x233)](_0x5350d9(0x1ed)), _0x4dc131 = document['getElementById']('list-content');
-    _0x4dc131[_0x5350d9(0x1e3)] = '';
-    _0x42c843 === 'birth' ? (_0x4e11c3[_0x5350d9(0x1f3)] = _0x5350d9(0x1f7), birthdays['sort'](function (_0xbaf73e, _0x21d9e2) {
-        return _0xbaf73e['m'] - _0x21d9e2['m'] || _0xbaf73e['d'] - _0x21d9e2['d'];
-    })[_0x5350d9(0x14b)](function (_0x5b59d4) {
-        var _0x16de44 = _0x5350d9;
-        _0x4dc131[_0x16de44(0x1e3)] += _0x16de44(0x1c5) + _0x5b59d4['d'] + '/' + _0x5b59d4['m'] + '\x20-\x20' + _0x5b59d4[_0x16de44(0x1a0)] + _0x16de44(0x22e);
-    })) : (_0x4e11c3[_0x5350d9(0x1f3)] = 'DANH\x20SÁCH\x20NGÀY\x20GIỖ', anniversaries['sort'](function (_0x24b749, _0x23b126) {
-        return _0x24b749['m'] - _0x23b126['m'] || _0x24b749['d'] - _0x23b126['d'];
-    })['forEach'](function (_0x429e44) {
-        var _0x371898 = _0x5350d9;
-        _0x4dc131['innerHTML'] += _0x371898(0x1c5) + _0x429e44['d'] + '/' + _0x429e44['m'] + _0x371898(0x1ca) + _0x429e44[_0x371898(0x1a0)] + _0x371898(0x22e);
-    }));
-    _0x16573a[_0x5350d9(0x1d5)][_0x5350d9(0x155)]('show-modal');
-    if (listModalTimeout)
-        clearTimeout(listModalTimeout);
-    listModalTimeout = setTimeout(closeListModal, 0x2710);
-}
-function closeListModal() {
-    var _0x4c0260 = _0x1e4df6;
-    document[_0x4c0260(0x233)](_0x4c0260(0x18f))[_0x4c0260(0x1d5)][_0x4c0260(0x172)](_0x4c0260(0x136));
-}
-function handleAction(_0x1cbb7b, _0x5aa3b2) {
-    var _0x10f2de = _0x1e4df6;
-    _0x1cbb7b[_0x10f2de(0x1ff)](), _0x1cbb7b[_0x10f2de(0x1c7)]();
-    if (!audioUnlocked)
-        try {
-            audioCtx = new (window['AudioContext'] || window[(_0x10f2de(0x170))])();
-            var _0x1e1f1e = audioCtx['createOscillator']();
-            _0x1e1f1e[_0x10f2de(0x1bd)](audioCtx['destination']), _0x1e1f1e[_0x10f2de(0x18d)](0x0), _0x1e1f1e['stop'](0.001), audioUnlocked = !![];
-        } catch (_0x44dd95) {
-        }
-    if (audioCtx && audioCtx[_0x10f2de(0x1df)] === _0x10f2de(0x239))
-        audioCtx['resume']();
-    if (_0x5aa3b2 === _0x10f2de(0x1ee))
-        toggleNightMode();
-    else {
-        if (_0x5aa3b2 === 'style')
-            currentStyleIdx = (currentStyleIdx + 0x1) % clockStyles[_0x10f2de(0x156)], applyClockStyle(), showToast(_0x10f2de(0x1b8) + (currentStyleIdx + 0x1) + _0x10f2de(0x213));
-        else {
-            if (_0x5aa3b2 === _0x10f2de(0x158)) {
-                if (wakeUpHour === 0x5)
-                    wakeUpHour = 0x6;
-                else {
-                    if (wakeUpHour === 0x6)
-                        wakeUpHour = 0x7;
-                    else {
-                        if (wakeUpHour === 0x7)
-                            wakeUpHour = 0x8;
-                        else
-                            wakeUpHour = 0x5;
-                    }
-                }
-                localStorage['setItem'](_0x10f2de(0x200), wakeUpHour), showToast(_0x10f2de(0x20f) + wakeUpHour + _0x10f2de(0x173)), updateClock();
-            } else {
-                if (_0x5aa3b2 === _0x10f2de(0x17d)) {
-                    currentIntervalIdx = (currentIntervalIdx + 0x1) % stepSeconds[_0x10f2de(0x156)];
-                    var _0x386cb7 = stepSeconds[currentIntervalIdx] / 0x3c;
-                    changeIntervalMode(currentIntervalIdx + 0x1), showToast('⏳\x20Đổi\x20thời\x20gian\x20ảnh:\x20' + _0x386cb7 + _0x10f2de(0x1b5));
-                } else {
-                    if (_0x5aa3b2 === _0x10f2de(0x142))
-                        forceNextSlide();
-                    else {
-                        if (_0x5aa3b2 === 'chime')
-                            showToast(_0x10f2de(0x145)), playSolemnChime();
-                        else {
-                            if (_0x5aa3b2 === _0x10f2de(0x182))
-                                openLocationModal();
-                            else {
-                                if (_0x5aa3b2 === _0x10f2de(0x219))
-                                    showAllLists(_0x10f2de(0x231));
-                                else
-                                    _0x5aa3b2 === _0x10f2de(0x146) && showAllLists(_0x10f2de(0x199));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-function forceNextSlide() {
-    var _0x11e316 = _0x1e4df6;
-    goToNextSlide(), changeIntervalMode(currentIntervalIdx + 0x1), showToast(_0x11e316(0x160));
-}
-function toggleNightMode() {
-    var _0x3bf1c3 = _0x1e4df6, _0x27cb8f = document[_0x3bf1c3(0x237)];
-    _0x27cb8f[_0x3bf1c3(0x1d5)][_0x3bf1c3(0x1a1)](_0x3bf1c3(0x1fb)) ? (forceNightMode = ![], _0x27cb8f[_0x3bf1c3(0x1d5)][_0x3bf1c3(0x172)](_0x3bf1c3(0x1fb)), showToast('☀️\x20Chào\x20ngày\x20mới!'), document['getElementById'](_0x3bf1c3(0x1bf))['style'][_0x3bf1c3(0x19f)] = _0x3bf1c3(0x15e), syncDriveData()) : (forceNightMode = !![], _0x27cb8f[_0x3bf1c3(0x1d5)][_0x3bf1c3(0x155)](_0x3bf1c3(0x1fb)), showToast(_0x3bf1c3(0x20e)), document[_0x3bf1c3(0x233)](_0x3bf1c3(0x1bf))[_0x3bf1c3(0x20c)][_0x3bf1c3(0x19f)] = _0x3bf1c3(0x16d), syncDriveData()), applyDynamicPositions();
-}
-function triggerBorderBurnInProtection() {
-    var _0xac8865 = _0x1e4df6;
-    if (document[_0xac8865(0x237)][_0xac8865(0x1d5)][_0xac8865(0x1a1)](_0xac8865(0x1fb)))
-        return;
-    var _0x5e95be = document[_0xac8865(0x1b6)](_0xac8865(0x1fc)), _0x3e9944 = document[_0xac8865(0x233)](_0xac8865(0x1f2)), _0x5851a5 = document[_0xac8865(0x233)](_0xac8865(0x140));
-    _0x5e95be && _0x5e95be[_0xac8865(0x167)] && (_0x3e9944[_0xac8865(0x167)] = _0x5e95be['src'], _0x5851a5['style'][_0xac8865(0x20b)] = '0', setTimeout(function () {
-        var _0x5b415d = _0xac8865;
-        _0x5851a5[_0x5b415d(0x20c)][_0x5b415d(0x20b)] = '1';
-    }, 0x5dc));
-}
-setInterval(triggerBorderBurnInProtection, 0x927c0);
-function runAntiBurnIn() {
-    var _0x5e036d = _0x1e4df6;
-    bX1 = Math[_0x5e036d(0x1ad)](Math[_0x5e036d(0x13d)]() * 0x1e) - 0xf, bY1 = Math[_0x5e036d(0x1ad)](Math[_0x5e036d(0x13d)]() * 0x1e) - 0xf, bX2 = Math['floor'](Math[_0x5e036d(0x13d)]() * 0x1e) - 0xf, bY2 = Math['floor'](Math[_0x5e036d(0x13d)]() * 0x1e) - 0xf, bX3 = Math[_0x5e036d(0x1ad)](Math[_0x5e036d(0x13d)]() * 0x1e) - 0xf, bY3 = Math[_0x5e036d(0x1ad)](Math[_0x5e036d(0x13d)]() * 0x1e) - 0xf, applyDynamicPositions();
-}
-setInterval(runAntiBurnIn, 0xea60);
-function applyDynamicPositions() {
-    var _0x209012 = _0x1e4df6, _0xff787f = document[_0x209012(0x237)][_0x209012(0x1d5)][_0x209012(0x1a1)](_0x209012(0x1fb)), _0x1adfe4 = document[_0x209012(0x233)](_0x209012(0x24d)), _0xefdc2c = document['getElementById'](_0x209012(0x1e0)), _0x3989d9 = document[_0x209012(0x233)](_0x209012(0x256)), _0x3fa089 = document['getElementById']('bottom-left-events'), _0x356808 = document[_0x209012(0x233)](_0x209012(0x14f));
-    if (_0xff787f)
-        _0x1adfe4[_0x209012(0x20c)]['transform'] = 'translate(calc(-50%\x20+\x20' + bX1 + _0x209012(0x22d) + bY1 + 'px))';
-    else {
-        _0x1adfe4[_0x209012(0x20c)][_0x209012(0x1c8)] = 'none';
-        if (_0xefdc2c)
-            _0xefdc2c[_0x209012(0x20c)][_0x209012(0x1c8)] = _0x209012(0x1f8) + bX1 + _0x209012(0x1a4) + bY1 + _0x209012(0x203);
-        if (_0x3989d9)
-            _0x3989d9[_0x209012(0x20c)][_0x209012(0x1c8)] = _0x209012(0x1f8) + bX2 + _0x209012(0x1a4) + bY2 + _0x209012(0x203);
-        if (_0x3fa089)
-            _0x3fa089['style'][_0x209012(0x1c8)] = _0x209012(0x1f8) + bX3 + 'px,\x20' + bY3 + _0x209012(0x203);
-        if (_0x356808)
-            _0x356808[_0x209012(0x20c)][_0x209012(0x1c8)] = _0x209012(0x1f8) + bX3 + _0x209012(0x1a4) + bY3 + _0x209012(0x203);
-    }
-}
-function renderEvents(_0x1125fa, _0x497d8d, _0x287180, _0x5dcc9e) {
-    var _0x1293c1 = _0x1e4df6, _0x16378a = '', _0x1db50a = [];
-    for (var _0x323558 = 0x0; _0x323558 < birthdays[_0x1293c1(0x156)]; _0x323558++) {
-        if (birthdays[_0x323558]['m'] === _0x1125fa)
-            _0x1db50a[_0x1293c1(0x1fe)](birthdays[_0x323558]);
-    }
-    _0x1db50a[_0x1293c1(0x16c)](function (_0x508353, _0x57ac2d) {
-        return _0x508353['d'] - _0x57ac2d['d'];
-    });
-    if (_0x1db50a['length'] > 0x0) {
-        _0x16378a += _0x1293c1(0x24b);
-        for (var _0x3d11c5 = 0x0; _0x3d11c5 < _0x1db50a[_0x1293c1(0x156)]; _0x3d11c5++) {
-            var _0x45edb3 = _0x1db50a[_0x3d11c5], _0x371d01 = _0x45edb3['d'] - _0x287180, _0x4ae53e = _0x1293c1(0x1cb), _0x3467b8 = _0x45edb3['d'] + '/' + _0x45edb3['m'] + '\x20' + _0x45edb3[_0x1293c1(0x1a0)];
-            if (_0x371d01 < 0x0)
-                _0x4ae53e += _0x1293c1(0x22a);
-            else {
-                if (_0x371d01 === 0x0)
-                    _0x4ae53e += _0x1293c1(0x1b1), _0x3467b8 += _0x1293c1(0x236);
-                else
-                    _0x371d01 <= 0x3 && (_0x4ae53e += '\x20event-urgent', _0x3467b8 += _0x1293c1(0x24c) + _0x371d01 + _0x1293c1(0x206));
-            }
-            _0x16378a += _0x1293c1(0x1b7) + _0x4ae53e + '\x22>' + _0x3467b8 + _0x1293c1(0x22e);
-        }
-    }
-    var _0xd442ee = document[_0x1293c1(0x233)](_0x1293c1(0x207));
-    _0xd442ee && _0xd442ee['innerHTML'] !== _0x16378a && (_0xd442ee[_0x1293c1(0x1e3)] = _0x16378a);
-    windowDeathList = [];
-    var _0xd386c2 = [];
-    for (var _0x44b4c9 = 0x0; _0x44b4c9 < anniversaries[_0x1293c1(0x156)]; _0x44b4c9++) {
-        if (anniversaries[_0x44b4c9]['m'] === _0x497d8d)
-            _0xd386c2[_0x1293c1(0x1fe)](anniversaries[_0x44b4c9]);
-    }
-    _0xd386c2['sort'](function (_0x50a5ac, _0x34bfef) {
-        return _0x50a5ac['d'] - _0x34bfef['d'];
-    });
-    if (_0xd386c2[_0x1293c1(0x156)] > 0x0)
-        for (var _0x2ddad0 = 0x0; _0x2ddad0 < _0xd386c2[_0x1293c1(0x156)]; _0x2ddad0++) {
-            var _0x1d9573 = _0xd386c2[_0x2ddad0], _0x371d01 = _0x1d9573['d'] - _0x5dcc9e, _0x2381de = _0x1d9573[_0x1293c1(0x1a0)][_0x1293c1(0x23b)]('\x20(')[0x0], _0x3467b8 = _0x1293c1(0x162) + _0x2381de + '\x20(' + _0x1d9573['d'] + '/' + _0x1d9573['m'] + '\x20ÂL)';
-            if (_0x371d01 < 0x0)
-                windowDeathList[_0x1293c1(0x1fe)](_0x1293c1(0x13f) + _0x3467b8 + '</span>');
-            else {
-                if (_0x371d01 === 0x0)
-                    _0x3467b8 = _0x1293c1(0x137) + _0x3467b8;
-                else
-                    _0x371d01 <= 0x3 && (_0x3467b8 = _0x1293c1(0x143) + _0x371d01 + _0x1293c1(0x22b) + _0x3467b8);
-                windowDeathList[_0x1293c1(0x1fe)](_0x1293c1(0x177) + _0x3467b8 + _0x1293c1(0x15b));
-            }
-        }
-}
-function checkForBirthdayMusic(_0x2e7dbf) {
-    var _0x25667d = _0x1e4df6;
-    if (birthdays['length'] === 0x0)
-        return;
-    var _0x35a58a = new Date(), _0x411090 = _0x35a58a['getHours'](), _0x2ebdef = _0x35a58a[_0x25667d(0x20d)](), _0x3231aa = null;
-    for (var _0x4344de = 0x0; _0x4344de < birthdays['length']; _0x4344de++) {
-        if (birthdays[_0x4344de]['m'] === _0x35a58a[_0x25667d(0x13e)]() + 0x1 && birthdays[_0x4344de]['d'] === _0x35a58a[_0x25667d(0x1c2)]()) {
-            _0x3231aa = birthdays[_0x4344de];
-            break;
-        }
-    }
-    if (_0x3231aa) {
-        loadMorningMusicFlag === ![] && _0x411090 >= wakeUpHour && _0x411090 < 0x8 && (showToast(_0x25667d(0x1ef) + _0x3231aa[_0x25667d(0x1a0)] + '!'), playHappyBirthday(), loadMorningMusicFlag = !![]);
-        clock8AMMusicFlag === ![] && _0x411090 === 0x8 && _0x2ebdef === 0x0 && (showToast(_0x25667d(0x1ef) + _0x3231aa['name'] + '!'), playHappyBirthday(), clock8AMMusicFlag = !![]);
-        clock14PMMusicFlag === ![] && _0x411090 === 0xe && _0x2ebdef === 0x0 && (showToast(_0x25667d(0x1ef) + _0x3231aa['name'] + '!'), playHappyBirthday(), clock14PMMusicFlag = !![]);
-        clock18PMMusicFlag === ![] && _0x411090 === 0x12 && _0x2ebdef === 0x0 && (showToast(_0x25667d(0x1ef) + _0x3231aa[_0x25667d(0x1a0)] + '!'), playHappyBirthday(), clock18PMMusicFlag = !![]);
-        if (lastBirthdayCheckDate && lastBirthdayCheckDate !== _0x35a58a[_0x25667d(0x1c2)]())
-            loadMorningMusicFlag = ![], clock8AMMusicFlag = ![], clock14PMMusicFlag = ![], clock18PMMusicFlag = ![], lastBirthdayCheckDate = _0x35a58a['getDate']();
-        else
-            !lastBirthdayCheckDate && (lastBirthdayCheckDate = _0x35a58a[_0x25667d(0x1c2)]());
-    } else
-        loadMorningMusicFlag = ![], clock8AMMusicFlag = ![], clock14PMMusicFlag = ![], clock18PMMusicFlag = ![];
-}
-function updateClock() {
-    var _0x3bed37 = _0x1e4df6, _0x50b672 = new Date(), _0x3b3bae = _0x50b672[_0x3bed37(0x196)](), _0x38f2e6 = _0x50b672['getMinutes'](), _0x2b599c = _0x50b672[_0x3bed37(0x248)]();
-    _0x3b3bae === wakeUpHour && _0x38f2e6 === 0x0 && _0x2b599c === 0x0 && (forceNightMode = null, syncDriveData());
-    var _0x2be18d = _0x3b3bae < 0xa ? '0' + _0x3b3bae : _0x3b3bae, _0x35faa4 = _0x38f2e6 < 0xa ? '0' + _0x38f2e6 : _0x38f2e6, _0x1b41c0 = document[_0x3bed37(0x233)](_0x3bed37(0x23c)), _0x3f0261 = document['getElementById'](_0x3bed37(0x1bc)), _0xf917ee = document['getElementById'](_0x3bed37(0x1d9)), _0x1ffcdf = document[_0x3bed37(0x233)](_0x3bed37(0x21f));
-    if (_0x1b41c0[_0x3bed37(0x1f3)] !== _0x2be18d)
-        _0x1b41c0[_0x3bed37(0x1f3)] = _0x2be18d;
-    if (_0x3f0261['innerText'] !== _0x35faa4)
-        _0x3f0261[_0x3bed37(0x1f3)] = _0x35faa4;
-    var _0x236d76 = window[_0x3bed37(0x23f)] > window[_0x3bed37(0x212)] ? _0x2be18d + ':' : _0x2be18d;
-    if (_0xf917ee[_0x3bed37(0x1f3)] !== _0x236d76)
-        _0xf917ee['innerText'] = _0x236d76;
-    if (_0x1ffcdf[_0x3bed37(0x1f3)] !== _0x35faa4)
-        _0x1ffcdf[_0x3bed37(0x1f3)] = _0x35faa4;
-    var _0x1e6f0b = document[_0x3bed37(0x237)][_0x3bed37(0x1d5)]['contains'](_0x3bed37(0x1fb));
-    if (forceNightMode === null) {
-        var _0x13ae24 = _0x3b3bae >= 0x15 || _0x3b3bae < wakeUpHour;
-        if (_0x13ae24 && !_0x1e6f0b)
-            document[_0x3bed37(0x237)][_0x3bed37(0x1d5)][_0x3bed37(0x155)](_0x3bed37(0x1fb)), document[_0x3bed37(0x233)](_0x3bed37(0x1bf))['style'][_0x3bed37(0x19f)] = _0x3bed37(0x16d);
-        else
-            !_0x13ae24 && _0x1e6f0b && (document[_0x3bed37(0x237)]['classList']['remove'](_0x3bed37(0x1fb)), document['getElementById']('brightness-overlay')[_0x3bed37(0x20c)]['background'] = _0x3bed37(0x15e));
-    }
-    var _0x1be425 = new Date(_0x50b672['getFullYear'](), _0x50b672['getMonth'](), _0x50b672[_0x3bed37(0x1c2)](), 0x0, 0x0, 0x0), _0x2bc31f = phases[0x0];
-    for (var _0x3d56f6 = 0x0; _0x3d56f6 < phases[_0x3bed37(0x156)]; _0x3d56f6++) {
-        var _0x4d53b5 = new Date(phases[_0x3d56f6][0x0], phases[_0x3d56f6][0x1], phases[_0x3d56f6][0x2], 0x0, 0x0, 0x0);
-        if (_0x1be425 >= _0x4d53b5)
-            _0x2bc31f = phases[_0x3d56f6];
-        else
-            break;
-    }
-    var _0x3e7f41 = new Date(_0x2bc31f[0x0], _0x2bc31f[0x1], _0x2bc31f[0x2], 0x0, 0x0, 0x0), _0x2b7cef = Math[_0x3bed37(0x1ad)]((_0x1be425 - _0x3e7f41) / (0x3e8 * 0x3c * 0x3c * 0x18)) + 0x1, _0x9d1807 = _0x2bc31f[0x1] === 0x0 ? 0xc : _0x2bc31f[0x1], _0x2545ab = [
-            'CN',
-            _0x3bed37(0x148),
-            _0x3bed37(0x227),
-            _0x3bed37(0x13c),
-            _0x3bed37(0x1bb),
-            'Th\x206',
-            _0x3bed37(0x205)
-        ], _0xf8383a = _0x3bed37(0x246) + _0x2545ab[_0x50b672[_0x3bed37(0x1c9)]()] + '</span>\x20' + _0x50b672[_0x3bed37(0x1c2)]() + '/' + (_0x50b672[_0x3bed37(0x13e)]() + 0x1), _0x32ba6f = document['getElementById'](_0x3bed37(0x14a));
-    if (_0x32ba6f[_0x3bed37(0x1e3)] !== _0xf8383a)
-        _0x32ba6f['innerHTML'] = _0xf8383a;
-    var _0x320c08 = _0x3bed37(0x21a) + _0x2b7cef + '/' + _0x9d1807, _0x27dc56 = document[_0x3bed37(0x233)](_0x3bed37(0x19a));
-    if (_0x27dc56[_0x3bed37(0x1e3)] !== _0x320c08)
-        _0x27dc56[_0x3bed37(0x1e3)] = _0x320c08;
-    renderEvents(_0x50b672['getMonth']() + 0x1, _0x9d1807, _0x50b672[_0x3bed37(0x1c2)](), _0x2b7cef), applyDynamicPositions(), checkForBirthdayMusic(_0x3bed37(0x245));
-    var _0x520414 = ![];
-    if (birthdays[_0x3bed37(0x156)] > 0x0)
-        for (var _0x4714e4 = 0x0; _0x4714e4 < birthdays['length']; _0x4714e4++) {
-            if (birthdays[_0x4714e4]['m'] === _0x50b672[_0x3bed37(0x13e)]() + 0x1 && birthdays[_0x4714e4]['d'] === _0x50b672[_0x3bed37(0x1c2)]()) {
-                _0x520414 = !![];
-                break;
-            }
-        }
-    if (_0x38f2e6 === 0x0 && _0x2b599c === 0x0 && !hourlyChimePlayed)
-        hourlyChimePlayed = !![], !document[_0x3bed37(0x237)][_0x3bed37(0x1d5)][_0x3bed37(0x1a1)](_0x3bed37(0x1fb)) && (!(_0x520414 && (_0x3b3bae === 0x8 || _0x3b3bae === 0xe || _0x3b3bae === 0x12 || _0x3b3bae === wakeUpHour)) && playSolemnChime());
-    else
-        _0x38f2e6 !== 0x0 && (hourlyChimePlayed = ![]);
-}
-setInterval(updateClock, 0x3e8);
-function generateSimulatedWeather() {
-    var _0x1d3e0e = _0x1e4df6, _0x3343ce = new Date()[_0x1d3e0e(0x196)](), _0x157c54 = 0x18;
-    if (_0x3343ce >= 0xb && _0x3343ce <= 0xf)
-        _0x157c54 = 0x20;
-    else {
-        if (_0x3343ce >= 0x5 && _0x3343ce <= 0x8)
-            _0x157c54 = 0x16;
-    }
-    document[_0x1d3e0e(0x233)](_0x1d3e0e(0x179))[_0x1d3e0e(0x1f3)] = _0x157c54, globalHum = _0x1d3e0e(0x13a), globalRain = _0x3343ce > 0xc && _0x3343ce < 0x12 ? _0x1d3e0e(0x17e) : _0x1d3e0e(0x1aa), globalWind = _0x1d3e0e(0x1e5), globalUV = _0x3343ce >= 0xa && _0x3343ce <= 0xe ? _0x1d3e0e(0x150) : '0.5', globalAlt = '473m';
-    if (globalSunrise === '--')
-        globalSunrise = _0x1d3e0e(0x24f);
-    if (globalSunset === '--')
-        globalSunset = _0x1d3e0e(0x1e1);
-    if (globalAQI === '--')
-        globalAQI = 0x26;
-    rotateWeatherDisplay();
-}
-function updateWeatherAndAQI() {
-    var _0xa53f7f = _0x1e4df6, _0x1e669f = parseFloat(clientLatitude), _0xbbbcf9 = parseFloat(clientLongitude);
-    (isNaN(_0x1e669f) || !_0x1e669f) && (_0x1e669f = 12.6792, _0xbbbcf9 = 108.0694);
-    var _0x4495e1 = new Date()[_0xa53f7f(0x15a)]();
-    document['getElementById'](_0xa53f7f(0x179))['innerText'] === '--' && (document['getElementById'](_0xa53f7f(0x179))[_0xa53f7f(0x1f3)] = '26', globalHum = _0xa53f7f(0x13a), globalRain = '10%', globalWind = _0xa53f7f(0x1e5), globalUV = _0xa53f7f(0x18b), globalAlt = _0xa53f7f(0x1c0), globalSunrise = _0xa53f7f(0x24f), globalSunset = _0xa53f7f(0x194), globalAQI = 0x28, rotateWeatherDisplay());
-    var _0x3997b0 = new XMLHttpRequest();
-    _0x3997b0[_0xa53f7f(0x185)] = 0x1f40, _0x3997b0[_0xa53f7f(0x228)](_0xa53f7f(0x1cc), 'https://api.open-meteo.com/v1/forecast?latitude=' + _0x1e669f[_0xa53f7f(0x226)](0x4) + '&longitude=' + _0xbbbcf9[_0xa53f7f(0x226)](0x4) + _0xa53f7f(0x18e) + _0x4495e1, !![]), _0x3997b0['onerror'] = function () {
-        generateSimulatedWeather();
-    }, _0x3997b0['ontimeout'] = function () {
-        generateSimulatedWeather();
-    }, _0x3997b0[_0xa53f7f(0x159)] = function () {
-        var _0x275be0 = _0xa53f7f;
-        if (_0x3997b0[_0x275be0(0x249)] === 0x4 && _0x3997b0[_0x275be0(0x1a7)] === 0xc8)
-            try {
-                var _0x340549 = JSON['parse'](_0x3997b0[_0x275be0(0x18a)]), _0x582e52 = new Date()['getHours']();
-                _0x340549[_0x275be0(0x1de)] && (document['getElementById']('weather-val')['innerText'] = Math['round'](_0x340549['hourly'][_0x275be0(0x1e8)][_0x582e52]), globalHum = _0x340549[_0x275be0(0x1de)]['relative_humidity_2m'][_0x582e52] + '%', globalRain = (_0x340549[_0x275be0(0x1de)][_0x275be0(0x17a)][_0x582e52] != null ? _0x340549[_0x275be0(0x1de)][_0x275be0(0x17a)][_0x582e52] : 0x0) + '%', globalUV = _0x340549[_0x275be0(0x1de)]['uv_index'][_0x582e52] != null ? _0x340549['hourly'][_0x275be0(0x139)][_0x582e52][_0x275be0(0x226)](0x1) : _0x275be0(0x138)), _0x340549['daily'] && _0x340549[_0x275be0(0x1d6)][_0x275be0(0x259)] && (globalSunrise = _0x340549[_0x275be0(0x1d6)][_0x275be0(0x259)][0x0][_0x275be0(0x17b)](0xb, 0x10), globalSunset = _0x340549['daily'][_0x275be0(0x217)][0x0][_0x275be0(0x17b)](0xb, 0x10)), rotateWeatherDisplay();
-            } catch (_0x520cb2) {
-                generateSimulatedWeather();
-            }
-    }, _0x3997b0[_0xa53f7f(0x1d0)]();
-    var _0x128270 = new XMLHttpRequest();
-    _0x128270[_0xa53f7f(0x185)] = 0x1f40, _0x128270[_0xa53f7f(0x228)](_0xa53f7f(0x1cc), _0xa53f7f(0x16f) + _0x1e669f[_0xa53f7f(0x226)](0x4) + _0xa53f7f(0x15f) + _0xbbbcf9[_0xa53f7f(0x226)](0x4) + '&hourly=us_aqi,pm2_5&timezone=Asia%2FHo_Chi_Minh&forecast_days=1&_cb=' + _0x4495e1, !![]), _0x128270[_0xa53f7f(0x159)] = function () {
-        var _0x48172d = _0xa53f7f;
-        if (_0x128270[_0x48172d(0x249)] === 0x4 && _0x128270[_0x48172d(0x1a7)] === 0xc8)
-            try {
-                var _0x32c8d1 = JSON[_0x48172d(0x251)](_0x128270[_0x48172d(0x18a)]), _0x13d25b = new Date()[_0x48172d(0x196)]();
-                if (_0x32c8d1[_0x48172d(0x1de)] && _0x32c8d1[_0x48172d(0x1de)]['us_aqi'] && _0x32c8d1[_0x48172d(0x1de)]['us_aqi'][_0x13d25b] != null)
-                    globalAQI = Math['round'](_0x32c8d1[_0x48172d(0x1de)][_0x48172d(0x201)][_0x13d25b]);
-                else {
-                    if (_0x32c8d1[_0x48172d(0x1de)] && _0x32c8d1[_0x48172d(0x1de)][_0x48172d(0x214)] && _0x32c8d1[_0x48172d(0x1de)][_0x48172d(0x214)][_0x13d25b] != null) {
-                        var _0xec4c5f = _0x32c8d1['hourly'][_0x48172d(0x214)][_0x13d25b];
-                        if (_0xec4c5f <= 0xc)
-                            globalAQI = Math[_0x48172d(0x144)](0x32 / 0xc * _0xec4c5f);
-                        else {
-                            if (_0xec4c5f <= 35.4)
-                                globalAQI = Math[_0x48172d(0x144)](0x31 / 23.4 * (_0xec4c5f - 12.1) + 0x33);
-                            else {
-                                if (_0xec4c5f <= 55.4)
-                                    globalAQI = Math[_0x48172d(0x144)](0x31 / 0x14 * (_0xec4c5f - 35.5) + 0x65);
-                                else
-                                    globalAQI = Math[_0x48172d(0x144)](_0xec4c5f + 0x64);
-                            }
-                        }
-                    }
-                }
-                rotateWeatherDisplay();
-            } catch (_0x453ea6) {
-            }
-    }, _0x128270[_0xa53f7f(0x1d0)]();
-}
-setInterval(updateWeatherAndAQI, 0x36ee80);
-function updateDynamicContentBySlide() {
-    var _0x49d6c1 = _0x1e4df6, _0x4c3bd3 = new Date(), _0x3060e9 = _0x4c3bd3[_0x49d6c1(0x13e)]() + 0x1, _0xc7e351 = _0x4c3bd3['getDate'](), _0x15d0e9 = new Date(_0x4c3bd3['getFullYear'](), _0x4c3bd3[_0x49d6c1(0x13e)](), _0x4c3bd3[_0x49d6c1(0x1c2)](), 0x0, 0x0, 0x0), _0x3bd0e6 = phases[0x0];
-    for (var _0x5e0ddb = 0x0; _0x5e0ddb < phases[_0x49d6c1(0x156)]; _0x5e0ddb++) {
-        var _0x4b6766 = new Date(phases[_0x5e0ddb][0x0], phases[_0x5e0ddb][0x1], phases[_0x5e0ddb][0x2], 0x0, 0x0, 0x0);
-        if (_0x15d0e9 >= _0x4b6766)
-            _0x3bd0e6 = phases[_0x5e0ddb];
-        else
-            break;
-    }
-    var _0xc29a84 = _0x3bd0e6[0x1] === 0x0 ? 0xc : _0x3bd0e6[0x1], _0x298af8 = Math[_0x49d6c1(0x1ad)]((_0x15d0e9 - new Date(_0x3bd0e6[0x0], _0x3bd0e6[0x1], _0x3bd0e6[0x2], 0x0, 0x0, 0x0)) / (0x3e8 * 0x3c * 0x3c * 0x18)) + 0x1;
-    rotateWeatherDisplay();
-    var _0x20d1be = [];
-    for (var _0x2a346b = 0x0; _0x2a346b < specialtiesData['length']; _0x2a346b++) {
-        if (specialtiesData[_0x2a346b]['m'] === _0x3060e9 || specialtiesData[_0x2a346b]['m'] === 0x0)
-            _0x20d1be['push'](specialtiesData[_0x2a346b][_0x49d6c1(0x244)]);
-    }
-    var _0x4d3b68 = '', _0x5b219c = Math[_0x49d6c1(0x13d)]();
-    if (_0x5b219c < 0.5 && _0x20d1be[_0x49d6c1(0x156)] > 0x0)
-        _0x4d3b68 = _0x49d6c1(0x1d4) + _0x20d1be[Math[_0x49d6c1(0x1ad)](Math[_0x49d6c1(0x13d)]() * _0x20d1be[_0x49d6c1(0x156)])];
-    else
-        quotePool[_0x49d6c1(0x156)] > 0x0 ? _0x4d3b68 = quotePool[Math['floor'](Math['random']() * quotePool['length'])] : _0x4d3b68 = _0x49d6c1(0x209);
-    var _0x359bc0 = '', _0x444f46 = 0x16d;
-    for (var _0x4d3728 = 0x0; _0x4d3728 < festivalsData['length']; _0x4d3728++) {
-        var _0x2df5ab = festivalsData[_0x4d3728];
-        if (_0x2df5ab['type'] === 's' && _0x2df5ab['m'] === _0x3060e9 && _0x2df5ab['d'] >= _0xc7e351) {
-            var _0x535f50 = _0x2df5ab['d'] - _0xc7e351;
-            _0x535f50 < _0x444f46 && (_0x444f46 = _0x535f50, _0x359bc0 = (_0x535f50 === 0x0 ? 'Hôm\x20nay:\x20' : _0x49d6c1(0x143) + _0x535f50 + _0x49d6c1(0x22b)) + _0x2df5ab[_0x49d6c1(0x244)] + '\x20(' + _0x2df5ab['d'] + '/' + _0x2df5ab['m'] + ')');
-        }
-        if (_0x2df5ab['type'] === 'l' && _0x2df5ab['m'] === _0xc29a84 && _0x2df5ab['d'] >= _0x298af8) {
-            var _0x31de6f = _0x2df5ab['d'] - _0x298af8;
-            _0x31de6f >= 0x0 && _0x31de6f < _0x444f46 && (_0x444f46 = _0x31de6f, _0x359bc0 = (_0x31de6f === 0x0 ? _0x49d6c1(0x208) : 'Còn\x20' + _0x31de6f + '\x20ngày\x20đến\x20') + _0x2df5ab[_0x49d6c1(0x244)] + '\x20(' + _0x2df5ab['d'] + '/' + _0x2df5ab['m'] + _0x49d6c1(0x22f));
-        }
-    }
-    var _0x38076c = document[_0x49d6c1(0x233)](_0x49d6c1(0x1a8));
-    if (_0x38076c)
-        _0x38076c[_0x49d6c1(0x1e3)] = _0x4d3b68;
-    setTimeout(function () {
-        var _0x9b600b = _0x49d6c1;
-        if (!_0x38076c)
-            return;
-        var _0x20f00d = window[_0x9b600b(0x1eb)](_0x38076c), _0x39cc62 = parseFloat(_0x20f00d['lineHeight']) || parseFloat(_0x20f00d[_0x9b600b(0x21e)]) * 1.5, _0x324666 = _0x38076c[_0x9b600b(0x1b4)], _0x3c5eb5 = Math[_0x9b600b(0x144)](_0x324666 / _0x39cc62), _0x442fd4 = [];
-        if (_0x359bc0 !== '')
-            _0x442fd4[_0x9b600b(0x1fe)](_0x9b600b(0x20a) + _0x359bc0 + _0x9b600b(0x15b));
-        if (windowDeathList[_0x9b600b(0x156)] > 0x0)
-            _0x442fd4 = _0x442fd4[_0x9b600b(0x1ec)](windowDeathList);
-        if (_0x442fd4[_0x9b600b(0x156)] > 0x0) {
-            var _0x240112 = _0x442fd4['join'](_0x9b600b(0x235));
-            _0x3c5eb5 <= 0x1 ? _0x38076c[_0x9b600b(0x1e3)] = _0x4d3b68 + _0x9b600b(0x18c) + _0x240112 : _0x38076c['innerHTML'] = _0x4d3b68 + _0x9b600b(0x235) + _0x240112;
-        }
-    }, 0x32);
-}
-function syncDriveData() {
-    var _0x3780c3 = _0x1e4df6, _0x828e50 = encodeURIComponent('\x27' + FOLDER_ID + _0x3780c3(0x247)), _0x1a2463 = _0x3780c3(0x242) + _0x828e50 + '&key=' + API_KEY + _0x3780c3(0x23a), _0x829d46 = new XMLHttpRequest();
-    _0x829d46[_0x3780c3(0x228)](_0x3780c3(0x1cc), _0x1a2463, !![]), _0x829d46[_0x3780c3(0x159)] = function () {
-        var _0x4b86f1 = _0x3780c3;
-        if (_0x829d46[_0x4b86f1(0x249)] === 0x4 && _0x829d46['status'] === 0xc8) {
-            var _0x158dbc = JSON['parse'](_0x829d46[_0x4b86f1(0x18a)]);
-            _0x158dbc['files'] && _0x158dbc[_0x4b86f1(0x193)]['length'] > 0x0 && downloadConfigFile(_0x158dbc['files'][0x0]['id']);
-        }
-    }, _0x829d46[_0x3780c3(0x1d0)]();
-    var _0x5e349a = encodeURIComponent('\x27' + FOLDER_ID + '\x27\x20in\x20parents\x20and\x20mimeType\x20contains\x20\x27image/\x27'), _0x401831 = _0x3780c3(0x242) + _0x5e349a + _0x3780c3(0x19d) + API_KEY + _0x3780c3(0x23d), _0x2f9cf1 = new XMLHttpRequest();
-    _0x2f9cf1[_0x3780c3(0x228)](_0x3780c3(0x1cc), _0x401831, !![]), _0x2f9cf1[_0x3780c3(0x159)] = function () {
-        var _0xf95845 = _0x3780c3;
-        if (_0x2f9cf1[_0xf95845(0x249)] === 0x4) {
-            if (_0x2f9cf1[_0xf95845(0x1a7)] === 0xc8) {
-                var _0x3a2f25 = JSON[_0xf95845(0x251)](_0x2f9cf1[_0xf95845(0x18a)]);
-                if (_0x3a2f25['files'] && _0x3a2f25['files'][_0xf95845(0x156)] > 0x0) {
-                    var _0x284dbd = [], _0x4be2c8 = [], _0x331b03 = new Date(Date[_0xf95845(0x1a6)]() - 0x30 * 0x3c * 0x3c * 0x3e8);
-                    for (var _0x4e0ec = 0x0; _0x4e0ec < _0x3a2f25[_0xf95845(0x193)][_0xf95845(0x156)]; _0x4e0ec++) {
-                        var _0x5bf46c = 'https://drive.google.com/thumbnail?id=' + _0x3a2f25['files'][_0x4e0ec]['id'] + _0xf95845(0x151);
-                        _0x284dbd[_0xf95845(0x1fe)](_0x5bf46c), new Date(_0x3a2f25['files'][_0x4e0ec][_0xf95845(0x16b)]) >= _0x331b03 && _0x4be2c8[_0xf95845(0x1fe)](_0x5bf46c);
-                    }
-                    function _0x4b89c3(_0x3220dd) {
-                        var _0x17f615 = _0xf95845, _0x2b9016 = _0x3220dd[_0x17f615(0x166)]();
-                        for (var _0x48b2d7 = _0x2b9016[_0x17f615(0x156)] - 0x1; _0x48b2d7 > 0x0; _0x48b2d7--) {
-                            var _0x407d2b = Math[_0x17f615(0x1ad)](Math['random']() * (_0x48b2d7 + 0x1)), _0x5d7914 = _0x2b9016[_0x48b2d7];
-                            _0x2b9016[_0x48b2d7] = _0x2b9016[_0x407d2b], _0x2b9016[_0x407d2b] = _0x5d7914;
-                        }
-                        return _0x2b9016;
-                    }
-                    _0x4be2c8[_0xf95845(0x156)] > 0x0 ? images = _0x4b89c3(_0x4be2c8)['concat'](_0x4b89c3(_0x284dbd)) : images = _0x4b89c3(_0x284dbd), currentIndex = 0x0, initSlideshow();
-                } else
-                    fallbackInit(_0xf95845(0x197));
-            } else
-                fallbackInit(_0xf95845(0x17f));
-        }
-    }, _0x2f9cf1['send']();
-}
-function fallbackInit(_0x494b8e) {
-    var _0x579c7b = _0x1e4df6, _0x56db46 = document[_0x579c7b(0x233)](_0x579c7b(0x1a8));
-    if (_0x56db46)
-        _0x56db46['innerText'] = _0x494b8e;
-    images = [_0x579c7b(0x19e)], initSlideshow();
-}
-function updateImageDisplayMechanism(_0x433ce7, _0x1a668c) {
-    var _0x2fef0f = _0x1e4df6, _0x122378 = window[_0x2fef0f(0x23f)] > window[_0x2fef0f(0x212)], _0x2ccbf6 = _0x433ce7[_0x2fef0f(0x187)] > _0x433ce7[_0x2fef0f(0x1c3)];
-    _0x433ce7[_0x2fef0f(0x1d5)][_0x2fef0f(0x172)](_0x2fef0f(0x1f9), _0x2fef0f(0x253)), _0x1a668c[_0x2fef0f(0x1d5)]['add'](_0x2fef0f(0x157));
-    _0x122378 ? _0x2ccbf6 ? _0x433ce7[_0x2fef0f(0x1d5)][_0x2fef0f(0x155)]('fit-cover') : _0x433ce7[_0x2fef0f(0x1d5)][_0x2fef0f(0x155)](_0x2fef0f(0x253)) : !_0x2ccbf6 ? _0x433ce7[_0x2fef0f(0x1d5)][_0x2fef0f(0x155)]('fit-cover') : _0x433ce7[_0x2fef0f(0x1d5)][_0x2fef0f(0x155)](_0x2fef0f(0x253));
-    var _0x14ebe6 = document['getElementById'](_0x2fef0f(0x1d9)), _0xa42004 = document[_0x2fef0f(0x233)](_0x2fef0f(0x23c));
-    if (_0x14ebe6 && _0xa42004) {
-        var _0x3f0ed2 = _0xa42004['innerText'];
-        _0x122378 ? _0x14ebe6['innerText'] = _0x3f0ed2 + ':' : _0x14ebe6[_0x2fef0f(0x1f3)] = _0x3f0ed2;
-    }
-}
-window[_0x1e4df6(0x1c4)](_0x1e4df6(0x1a9), function () {
-    var _0x1017b2 = _0x1e4df6, _0x3f92ea = document[_0x1017b2(0x233)](isGroup1Active ? 'fg1' : 'fg2'), _0x20c91f = document[_0x1017b2(0x233)](isGroup1Active ? 'group1' : _0x1017b2(0x184));
-    if (_0x3f92ea && _0x3f92ea[_0x1017b2(0x187)])
-        updateImageDisplayMechanism(_0x3f92ea, _0x20c91f);
-});
-function loadAndDisplayImage(_0x26ea1d, _0x4f7b5d, _0x4ba7df, _0x6f8f5d) {
-    var _0x2f9f31 = _0x1e4df6, _0xcfdbd3 = document['getElementById'](isGroup1Active ? _0x2f9f31(0x1d1) : 'group2'), _0x1a4a5e = document['getElementById'](_0x4f7b5d), _0x238257 = document[_0x2f9f31(0x233)](_0x4ba7df), _0xec8e63 = document[_0x2f9f31(0x233)](_0x6f8f5d);
-    _0xec8e63[_0x2f9f31(0x153)] = function () {
-        var _0x4ba91e = _0x2f9f31;
-        updateImageDisplayMechanism(_0xec8e63, _0x1a4a5e), _0xcfdbd3[_0x4ba91e(0x1d5)][_0x4ba91e(0x172)](_0x4ba91e(0x152)), _0x1a4a5e['classList'][_0x4ba91e(0x155)](_0x4ba91e(0x152)), isGroup1Active = !isGroup1Active, currentIndex = (currentIndex + 0x1) % images['length'], updateDynamicContentBySlide();
-    }, _0xec8e63['onerror'] = function () {
-        var _0x11224a = _0x2f9f31;
-        _0x26ea1d[_0x11224a(0x134)](_0x11224a(0x1a5)) === -0x1 && fallbackInit(_0x11224a(0x24e));
-    }, _0x238257['src'] = _0x26ea1d, _0xec8e63[_0x2f9f31(0x167)] = _0x26ea1d;
-}
-function initSlideshow() {
-    var _0x35a4f6 = _0x1e4df6;
-    applyClockStyle(), updateClock(), updateWeatherAndAQI(), loadAndDisplayImage(images[0x0], isGroup1Active ? _0x35a4f6(0x1d1) : _0x35a4f6(0x184), isGroup1Active ? _0x35a4f6(0x1db) : _0x35a4f6(0x1cf), isGroup1Active ? _0x35a4f6(0x1f6) : 'fg2'), changeIntervalMode(currentIntervalIdx + 0x1);
-}
-function goToNextSlide() {
-    var _0x37859a = _0x1e4df6;
-    if (images['length'] <= 0x1)
-        return;
-    var _0x5f0cff = (currentIndex + 0x1) % images['length'];
-    loadAndDisplayImage(images[_0x5f0cff], isGroup1Active ? _0x37859a(0x184) : _0x37859a(0x1d1), isGroup1Active ? _0x37859a(0x1cf) : _0x37859a(0x1db), isGroup1Active ? _0x37859a(0x14d) : 'fg1');
-}
-function changeIntervalMode(_0x160292) {
-    currentIntervalIdx = _0x160292 - 0x1;
-    var _0x27fd6b = stepSeconds[currentIntervalIdx];
-    if (slideInterval)
-        clearInterval(slideInterval);
-    slideInterval = setInterval(goToNextSlide, _0x27fd6b * 0x3e8);
-}
-window['handleAction'] = handleAction, window[_0x1e4df6(0x192)] = saveLocation, window[_0x1e4df6(0x21b)] = defaultLocation, window[_0x1e4df6(0x1d2)] = closeLocationModal, window[_0x1e4df6(0x141)] = closeListModal, syncDriveData();
-    }
-    
-    setInterval(function(){ debugger; }, 100);
-    runEngine();
-</script>
+    <div id="frame-wrapper">
+        <div id="photo-container">
+            <div id="group1" class="slide-group active"><img id="bg1" class="background-blur"><img id="fg1" class="foreground-image"></div>
+            <div id="group2" class="slide-group"><img id="bg2" class="background-blur"><img id="fg2" class="foreground-image"></div>
+        </div>
+        <div class="overlay"></div>
+        <div id="brightness-overlay"></div>
+        <div id="toast-msg">Thông báo</div>
 
+        <div id="info-container">
+            <div id="clock-flex-wrapper">
+                <span class="hours-style tap-target" id="hr-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00</span>
+                <span class="minutes-style tap-target" id="min-node" ontouchstart="handleAction(event, 'style')" onclick="handleAction(event, 'style')">00</span>
+            </div>
+            <div id="date-solar-top" class="tap-target" ontouchstart="handleAction(event, 'wakeup')" onclick="handleAction(event, 'wakeup')">Th 0 00/00</div>
+            <div id="date-lunar-top" class="tap-target" ontouchstart="handleAction(event, 'interval')" onclick="handleAction(event, 'interval')"><span class="highlight-yellow">AL</span> 00/00</div>
+        </div>
+        
+        <div id="night-clock-box">
+            <span class="night-hours tap-target" id="night-hr-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00:</span>
+            <span class="night-minutes tap-target" id="night-min-node" ontouchstart="handleAction(event, 'night')" onclick="handleAction(event, 'night')">00</span>
+        </div>
+
+        <div id="top-right-wrapper">
+            <div id="right-env-container" class="tap-target" ontouchstart="handleAction(event, 'open_location')" onclick="handleAction(event, 'open_location')"></div>
+            <div id="temp-wrapper" class="tap-target" ontouchstart="handleAction(event, 'next')" onclick="handleAction(event, 'next')">
+                <span id="weather-val">--</span><span class="degree-symbol">°</span>
+            </div>
+        </div>
+        
+        <div id="bottom-container">
+            <div id="bottom-left-events" class="tap-target" ontouchstart="handleAction(event, 'show_birth')" onclick="handleAction(event, 'show_birth')"></div>
+            <div id="bottom-right-text" class="tap-target" ontouchstart="handleAction(event, 'show_death')" onclick="handleAction(event, 'show_death')">
+                <span id="quote-row">Đang tải và đồng bộ hệ thống dữ liệu điện toán đám mây...</span>
+            </div>
+        </div>
+        
+        <div id="location-modal" class="modal-base">
+            <div class="modal-title">CÀI ĐẶT VỊ TRÍ</div>
+            <input type="text" id="loc-name" class="loc-input" placeholder="Tên địa phương (VD: Tân Lập)">
+            <input type="text" inputmode="decimal" id="loc-lat" class="loc-input" placeholder="Vĩ độ (Chấm hoặc phẩy đều được)">
+            <input type="text" inputmode="decimal" id="loc-lon" class="loc-input" placeholder="Kinh độ (VD: 108.0694)">
+            <div class="loc-btns">
+                <button class="loc-btn btn-save" ontouchstart="saveLocation(); event.preventDefault();" onclick="saveLocation()">LƯU</button>
+                <button class="loc-btn btn-default" ontouchstart="defaultLocation(); event.preventDefault();" onclick="defaultLocation()">MẶC ĐỊNH</button>
+            </div>
+            <button class="btn-close-modal" ontouchstart="closeLocationModal(); event.preventDefault();" onclick="closeLocationModal()">Đóng (Hủy)</button>
+        </div>
+
+        <div id="list-modal" class="modal-base">
+            <div id="list-title" class="modal-title">DANH SÁCH</div>
+            <div id="list-content"></div>
+            <button class="btn-close-modal" style="margin-top:10px;" ontouchstart="closeListModal(); event.preventDefault();" onclick="closeListModal()">Đóng bảng</button>
+        </div>
+
+    </div>
+
+    <script>
+        var SECRET_ENCODED = 'QUl6YVN5REwyRm1VQzkxMUtBTnFwN3VPbnZKcU5xVHltb1R2SkxF'; var API_KEY = atob(SECRET_ENCODED); var FOLDER_ID = '1r1WUIKwAPAnsyIh-Zot7AevEW0uEZ-Hl'; 
+        var images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048&auto=format&fit=crop']; 
+        var currentIndex = 0; var slideInterval; var toastTimeout; var locationModalTimeout; var listModalTimeout;
+        var audioCtx = null; var isGroup1Active = true; var audioUnlocked = false; var forceNightMode = null; 
+        
+        var globalAQI = "--", globalHum = "--", globalRain = "--", globalSunrise = "--", globalSunset = "--"; 
+        var globalUV = "--", globalAlt = "--";
+        var envDisplayIndex = 0; 
+        var windowDeathList = []; 
+        
+        var bX1 = 0, bY1 = 0; var bX2 = 0, bY2 = 0; var bX3 = 0, bY3 = 0;
+        var stepSeconds = [180, 300, 600, 900]; 
+        var currentIntervalIdx = 1; 
+        var wakeUpHour = localStorage.getItem('wakeUpHour') ? parseInt(localStorage.getItem('wakeUpHour')) : 6;
+        
+        var loadMorningMusicFlag = false; var clock8AMMusicFlag = false; var clock14PMMusicFlag = false; var clock18PMMusicFlag = false; var lastBirthdayCheckDate = null; 
+        var hourlyChimePlayed = false; // Cờ kiểm soát tiếng chuông 1 tiếng / lần
+        
+        var clockStyles = [
+            { f: "'Montserrat', sans-serif", hc: "#F4B41A", mc: "#ffffff", fw: 700 }, { f: "'Montserrat', sans-serif", hc: "#ffffff", mc: "#F4B41A", fw: 700 },
+            { f: "'Tourney', cursive", hc: "#F4B41A", mc: "#ffffff", fw: 600 }, { f: "'Tourney', cursive", hc: "#ffffff", mc: "#F4B41A", fw: 600 },
+            { f: "'Playfair Display', serif", hc: "#F4B41A", mc: "#ffffff", fw: 700 }, { f: "'Playfair Display', serif", hc: "#ffffff", mc: "#F4B41A", fw: 700 },
+            { f: "'Oswald', sans-serif", hc: "#00E5FF", mc: "#ffffff", fw: 600 }, { f: "'Oswald', sans-serif", hc: "#F4B41A", mc: "#ffffff", fw: 600 },
+            { f: "'Righteous', cursive", hc: "#FF3366", mc: "#ffffff", fw: 400 }, { f: "'Righteous', cursive", hc: "#F4B41A", mc: "#ffffff", fw: 400 },
+            { f: "'Courier Prime', monospace", hc: "#B4E61D", mc: "#ffffff", fw: 700 }, { f: "'Courier Prime', monospace", hc: "#ffffff", mc: "#F4B41A", fw: 700 },
+            { f: "'Cinzel', serif", hc: "#F4B41A", mc: "#ffffff", fw: 700 }, { f: "'Cinzel', serif", hc: "#ffffff", mc: "#F4B41A", fw: 700 },
+            { f: "'Montserrat', sans-serif", hc: "#00E5FF", mc: "#FF3366", fw: 700 }, { f: "'Tourney', cursive", hc: "#B4E61D", mc: "#FF9100", fw: 600 },
+            { f: "'Playfair Display', serif", hc: "#E0E0E0", mc: "#E0E0E0", fw: 700 }, { f: "'Oswald', sans-serif", hc: "#FF9100", mc: "#ffffff", fw: 600 },
+            { f: "'Righteous', cursive", hc: "#00E5FF", mc: "#B4E61D", fw: 400 }, { f: "'Cinzel', serif", hc: "#E0E0E0", mc: "#F4B41A", fw: 700 },
+            { f: "'Montserrat', sans-serif", hc: "#FF9100", mc: "#F4B41A", fw: 700 }, { f: "'Courier Prime', monospace", hc: "#00E5FF", mc: "#00E5FF", fw: 700 },
+            { f: "'Tourney', cursive", hc: "#FF3366", mc: "#ffffff", fw: 600 }, { f: "'Playfair Display', serif", hc: "#ffffff", mc: "#ffffff", fw: 700 },
+            { f: "'Oswald', sans-serif", hc: "#B4E61D", mc: "#ffffff", fw: 600 }, { f: "'Righteous', cursive", hc: "#ffffff", mc: "#FF3366", fw: 400 },
+            { f: "'Cinzel', serif", hc: "#FF9100", mc: "#ffffff", fw: 700 }, { f: "'Montserrat', sans-serif", hc: "#E0E0E0", mc: "#FF3366", fw: 700 },
+            { f: "'Tourney', cursive", hc: "#00E5FF", mc: "#B4E61D", fw: 600 }, { f: "'Playfair Display', serif", hc: "#FF3366", mc: "#F4B41A", fw: 700 }
+        ];
+        var currentStyleIdx = parseInt(localStorage.getItem('clockStyle'));
+        if(isNaN(currentStyleIdx) || currentStyleIdx < 0 || currentStyleIdx >= clockStyles.length) currentStyleIdx = 0;
+
+        var defaultLatitude = 12.6792; var defaultLongitude = 108.0694; var defaultLocalName = "Tân Lập";
+        var clientLatitude = localStorage.getItem('myLat') ? parseFloat(localStorage.getItem('myLat')) : defaultLatitude;
+        var clientLongitude = localStorage.getItem('myLon') ? parseFloat(localStorage.getItem('myLon')) : defaultLongitude;
+        var clientLocalName = localStorage.getItem('myName') ? localStorage.getItem('myName') : defaultLocalName;
+
+        var birthdays = []; var anniversaries = []; var festivalsData = []; var specialtiesData = []; var quotePool = [];
+
+        var phases = [
+            [2025, 11, 20, 11, "Ất Tỵ"], [2026, 0, 19, 12, "Ất Tỵ"], [2026, 1, 17, 1, "Bính Ngọ"], [2026, 2, 19, 2, "Bính Ngọ"], [2026, 3, 17, 3, "Bính Ngọ"], [2026, 4, 16, 4, "Bính Ngọ"], [2026, 5, 15, 5, "Bính Ngọ"], [2026, 6, 14, 6, "Bính Ngọ"], [2026, 7, 13, 7, "Bính Ngọ"], [2026, 8, 11, 8, "Bính Ngọ"], [2026, 9, 11, 9, "Bính Ngọ"], [2026, 10, 10, 10, "Bính Ngọ"], [2026, 11, 9, 11, "Bính Ngọ"],
+            [2027, 0, 8, 12, "Bính Ngọ"], [2027, 1, 6, 1, "Đinh Mùi"], [2027, 2, 8, 2, "Đinh Mùi"], [2027, 3, 7, 3, "Đinh Mùi"], [2027, 4, 6, 4, "Đinh Mùi"], [2027, 5, 5, 5, "Đinh Mùi"], [2027, 6, 4, 6, "Đinh Mùi"], [2027, 7, 2, 7, "Đinh Mùi"], [2027, 7, 31, 7, "Đinh Mùi"], [2027, 8, 29, 8, "Đinh Mùi"], [2027, 9, 29, 9, "Đinh Mùi"], [2027, 10, 28, 10, "Đinh Mùi"], [2027, 11, 27, 11, "Đinh Mùi"],
+            [2028, 0, 26, 12, "Đinh Mùi"], [2028, 1, 26, 1, "Mậu Thân"], [2028, 2, 25, 2, "Mậu Thân"], [2028, 3, 26, 3, "Mậu Thân"], [2028, 4, 25, 4, "Mậu Thân"], [2028, 5, 24, 5, "Mậu Thân"], [2028, 6, 23, 5, "Mậu Thân"], [2028, 7, 22, 6, "Mậu Thân"], [2028, 8, 20, 7, "Mậu Thân"], [2028, 9, 19, 8, "Mậu Thân"], [2028, 10, 18, 9, "Mậu Thân"], [2028, 11, 17, 10, "Mậu Thân"],
+            [2029, 0, 16, 11, "Mậu Thân"], [2029, 1, 15, 12, "Mậu Thân"], [2029, 2, 13, 1, "Kỷ Dậu"], [2029, 3, 15, 2, "Kỷ Dậu"], [2029, 4, 13, 3, "Kỷ Dậu"], [2029, 5, 13, 4, "Kỷ Dậu"], [2029, 6, 11, 5, "Kỷ Dậu"], [2029, 7, 11, 6, "Kỷ Dậu"], [2029, 8, 10, 7, "Kỷ Dậu"], [2029, 9, 8, 8, "Kỷ Dậu"], [2029, 10, 8, 9, "Kỷ Dậu"], [2029, 11, 7, 10, "Kỷ Dậu"],
+            [2030, 0, 6, 11, "Kỷ Dậu"], [2030, 1, 5, 12, "Kỷ Dậu"], [2030, 2, 3, 1, "Canh Tuất"], [2030, 3, 5, 2, "Canh Tuất"], [2030, 4, 3, 3, "Canh Tuất"], [2030, 5, 2, 4, "Canh Tuất"], [2030, 6, 1, 5, "Canh Tuất"], [2030, 6, 30, 6, "Canh Tuất"], [2030, 7, 30, 7, "Canh Tuất"], [2030, 8, 29, 8, "Canh Tuất"], [2030, 9, 27, 9, "Canh Tuất"], [2030, 10, 27, 10, "Canh Tuất"], [2030, 11, 26, 11, "Canh Tuất"]
+        ];
+
+        function getEnvColor(type, val) {
+            var strVal = String(val); 
+            if (strVal === "--" || strVal.indexOf('--') !== -1) return "#ffffff";
+            var v = parseFloat(strVal);
+            if (type === 'aqi') {
+                if (v <= 50) return "#ffffff";
+                if (v <= 100) return "#F4B41A"; 
+                if (v <= 150) return "#FF9500"; 
+                return "#FF3366"; 
+            }
+            if (type === 'uv') {
+                if (v <= 2) return "#ffffff";
+                if (v <= 5) return "#F4B41A";
+                if (v <= 7) return "#FF9500";
+                return "#FF3366";
+            }
+            if (type === 'rain') {
+                if (v < 51) return "#ffffff";
+                if (v <= 75) return "#F4B41A"; 
+                return "#FF3366"; 
+            }
+            return "#ffffff";
+        }
+
+        /* 🌟 THUẬT TOÁN ĐO CHIỀU NGANG ÉP TÂM */
+        function syncEnvWidth() {
+            setTimeout(function() {
+                var tempVal = document.getElementById('weather-val');
+                var envItem = document.querySelector('.env-rotating-item');
+                if (tempVal && envItem) {
+                    var targetW = tempVal.getBoundingClientRect().width;
+                    if (targetW > 0) {
+                        envItem.style.width = targetW + 'px';
+                        envItem.style.display = 'flex';
+                        envItem.style.justifyContent = 'center'; 
+                        envItem.style.alignItems = 'center';
+                        var fontSize = 1.1; 
+                        envItem.style.fontSize = fontSize + 'rem';
+                        while (envItem.scrollWidth > envItem.clientWidth && fontSize > 0.4) {
+                            fontSize -= 0.05;
+                            envItem.style.fontSize = fontSize + 'rem';
+                        }
+                    }
+                }
+            }, 50); 
+        }
+
+        function rotateWeatherDisplay() {
+            var envPool = [
+                'AQI <span style="color:' + getEnvColor('aqi', globalAQI) + '; font-weight:700;">' + globalAQI + '</span>',
+                '☀️ <span style="color:' + getEnvColor('uv', globalUV) + '; font-weight:700;">' + globalUV + '</span>',
+                '🌧️ <span style="color:' + getEnvColor('rain', parseFloat(globalRain)) + '; font-weight:700;">' + globalRain + '</span>',
+                '💧 ' + globalHum,
+                '🌅 ' + globalSunrise + '-' + globalSunset
+            ];
+            var currentEnv = envPool[envDisplayIndex % envPool.length];
+            envDisplayIndex++;
+            var container = document.getElementById('right-env-container');
+            if(container) {
+                container.innerHTML = '<div class="env-rotating-item">' + currentEnv + '</div>';
+                syncEnvWidth();
+            }
+        }
+        setInterval(rotateWeatherDisplay, 120000); // 2 Phút
+
+        function fetchConfigFromDrive() {
+            var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
+            var url = 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)';
+            var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); }
+                }
+            }; xhr.send();
+        }
+
+        function downloadConfigFile(fileId) {
+            var url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&key=' + API_KEY;
+            var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
+            if (xhr.overrideMimeType) xhr.overrideMimeType('text/plain; charset=utf-8');
+            xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { parseConfigText(xhr.responseText); } };
+            xhr.send();
+        }
+
+        function parseConfigText(text) {
+            var lines = text.split('\n'); var section = "";
+            var tempB = [], tempA = [], tempF = [], tempS = [], tempQ = [];
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].replace('\r', '').trim();
+                if (!line || line.indexOf('#') === 0) continue;
+                if (line.indexOf('[') === 0) { section = line.toUpperCase(); continue; }
+                if (section === "[THONG TIN QUAN TRONG]") {
+                    var parts = line.split('=');
+                    if(parts.length === 2) {
+                        var k = parts[0].trim().toUpperCase(); var v = parts[1].trim();
+                        if(k === "VI_DO") { if(!localStorage.getItem('myLat')) clientLatitude = parseFloat(v.replace(',', '.')); defaultLatitude = parseFloat(v.replace(',', '.')); }
+                        if(k === "KINH_DO") { if(!localStorage.getItem('myLon')) clientLongitude = parseFloat(v.replace(',', '.')); defaultLongitude = parseFloat(v.replace(',', '.')); }
+                        if(k === "TEN_DIA_PHUONG") { if(!localStorage.getItem('myName')) clientLocalName = v; defaultLocalName = v; }
+                    }
+                }
+                else if (section === "[DANH SACH SINH NHAT]") {
+                    var mB = line.match(/^(\d{1,2})\s*[\/]\s*(\d{1,2})\s+(.+)$/);
+                    if (mB) tempB.push({d: parseInt(mB[1],10), m: parseInt(mB[2],10), name: mB[3].trim()});
+                }
+                else if (section === "[DANH SACH NGAY GIO]") {
+                    var mA = line.match(/^(\d{1,2})\s*[\/]\s*(\d{1,2})\s+(.+)$/);
+                    if (mA) tempA.push({d: parseInt(mA[1],10), m: parseInt(mA[2],10), name: mA[3].trim()});
+                }
+                else if (section === "[LE HOI VIET NAM]" || section === "[NGAY LE TON GIAO]" || section === "[LE HOI VA NGAY LE TON GIAO]") {
+                    var mF = line.match(/^(s|l)\s*[\/]\s*(\d{1,2})\s*[\/]\s*(\d{1,2})\s+(.+)$/i);
+                    if (mF) tempF.push({type: mF[1].toLowerCase(), m: parseInt(mF[2],10), d: parseInt(mF[3],10), text: mF[4].trim()});
+                }
+                else if (section === "[DAC SAN THEO MUA]") {
+                    var mS = line.match(/^(\d{1,2})\s+(.+)$/);
+                    if (mS) tempS.push({m: parseInt(mS[1],10), text: mS[2].trim()});
+                }
+                else if (section === "[KHO DANH NGON CUOC LIFE]" || section === "[KHO DANH NGON CUOC SONG]") {
+                    tempQ.push(line);
+                }
+            }
+            if(tempB.length>0) birthdays = tempB; if(tempA.length>0) anniversaries = tempA;
+            if(tempF.length>0) festivalsData = tempF; if(tempS.length>0) specialtiesData = tempS;
+            if(tempQ.length>0) quotePool = tempQ;
+            
+            updateWeatherAndAQI(); updateClock();
+            updateDynamicContentBySlide(); 
+            checkForBirthdayMusic('load');
+        }
+
+        function showToast(msg) {
+            var toast = document.getElementById('toast-msg');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            if(toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(function() { toast.classList.remove('show'); }, 3000);
+        }
+
+        function applyClockStyle() {
+            var s = clockStyles[currentStyleIdx];
+            var hrNode = document.getElementById('hr-node');
+            var minNode = document.getElementById('min-node');
+            hrNode.style.fontFamily = s.f; hrNode.style.color = s.hc; hrNode.style.fontWeight = s.fw;
+            minNode.style.fontFamily = s.f; minNode.style.color = s.mc; minNode.style.fontWeight = s.fw;
+            localStorage.setItem('clockStyle', currentStyleIdx);
+        }
+
+        function playNote(freq, startTime, duration, type) {
+            if (!audioCtx) return;
+            var osc = audioCtx.createOscillator(); var gainNode = audioCtx.createGain();
+            osc.type = type || 'sine'; osc.frequency.setValueAtTime(freq, startTime);
+            gainNode.gain.setValueAtTime(0.2, startTime); gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.start(startTime); osc.stop(startTime + duration);
+        }
+
+        function playSolemnChime() {
+            if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            var t = audioCtx.currentTime;
+            playNote(220.00, t, 3.5, 'sine'); playNote(440.00, t + 0.2, 3.0, 'sine'); playNote(554.37, t + 0.5, 3.0, 'sine'); playNote(659.25, t + 0.8, 3.0, 'sine'); playNote(880.00, t + 1.2, 4.0, 'sine'); 
+        }
+
+        function playHappyBirthday() {
+            if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            var t = audioCtx.currentTime; var tempo = 0.45; 
+            function p(f, d) { playNote(f, t, d * tempo, 'triangle'); t += d * tempo; }
+            p(261.63, 0.75); p(261.63, 0.25); p(293.66, 1); p(261.63, 1); p(349.23, 1); p(329.63, 2);
+            p(261.63, 0.75); p(261.63, 0.25); p(293.66, 1); p(261.63, 1); p(392.00, 1); p(349.23, 2);
+            p(261.63, 0.75); p(261.63, 0.25); p(523.25, 1); p(440.00, 1); p(349.23, 1); p(329.63, 1); p(293.66, 2);
+            p(466.16, 0.75); p(466.16, 0.25); p(440.00, 1); p(349.23, 1); p(392.00, 1); p(349.23, 2);
+        }
+
+        function openLocationModal() {
+            var modal = document.getElementById('location-modal');
+            document.getElementById('loc-name').value = clientLocalName;
+            document.getElementById('loc-lat').value = clientLatitude;
+            document.getElementById('loc-lon').value = clientLongitude;
+            modal.classList.add('show-modal');
+            if (locationModalTimeout) clearTimeout(locationModalTimeout);
+            locationModalTimeout = setTimeout(closeLocationModal, 60000); 
+        }
+
+        function closeLocationModal() {
+            document.getElementById('location-modal').classList.remove('show-modal');
+            if (locationModalTimeout) clearTimeout(locationModalTimeout);
+        }
+
+        function saveLocation() {
+            var n = document.getElementById('loc-name').value.trim();
+            var latStr = document.getElementById('loc-lat').value.replace(',', '.');
+            var lonStr = document.getElementById('loc-lon').value.replace(',', '.');
+            var lat = parseFloat(latStr);
+            var lon = parseFloat(lonStr);
+            if (n && !isNaN(lat) && !isNaN(lon)) {
+                closeLocationModal();
+                clientLocalName = n; clientLatitude = lat; clientLongitude = lon;
+                localStorage.setItem('myName', n); localStorage.setItem('myLat', lat); localStorage.setItem('myLon', lon);
+                showToast("📍 Đã lưu vị trí: " + n);
+                globalAQI = "--"; 
+                updateWeatherAndAQI(); updateDynamicContentBySlide();
+            } else { alert("Vui lòng nhập tọa độ bằng số!"); }
+        }
+
+        function defaultLocation() {
+            closeLocationModal();
+            localStorage.removeItem('myName'); localStorage.removeItem('myLat'); localStorage.removeItem('myLon');
+            clientLocalName = defaultLocalName; clientLatitude = defaultLatitude; clientLongitude = defaultLongitude;
+            showToast("📍 Đã khôi phục vị trí mặc định");
+            globalAQI = "--"; 
+            updateWeatherAndAQI(); updateDynamicContentBySlide();
+        }
+
+        function showAllLists(type) {
+            var modal = document.getElementById('list-modal');
+            var title = document.getElementById('list-title');
+            var content = document.getElementById('list-content');
+            content.innerHTML = "";
+            if(type === 'birth') {
+                title.innerText = "DANH SÁCH SINH NHẬT";
+                birthdays.sort(function(a,b){return a.m-b.m || a.d-b.d;}).forEach(function(b) {
+                    content.innerHTML += '<div class="list-item">' + b.d + '/' + b.m + ' - ' + b.name + '</div>';
+                });
+            } else {
+                title.innerText = "DANH SÁCH NGÀY GIỖ";
+                anniversaries.sort(function(a,b){return a.m-b.m || a.d-b.d;}).forEach(function(a) {
+                    content.innerHTML += '<div class="list-item">' + a.d + '/' + a.m + ' ÂL - ' + a.name + '</div>';
+                });
+            }
+            modal.classList.add('show-modal');
+            if(listModalTimeout) clearTimeout(listModalTimeout);
+            listModalTimeout = setTimeout(closeListModal, 10000); 
+        }
+        function closeListModal() { document.getElementById('list-modal').classList.remove('show-modal'); }
+
+        function handleAction(e, action) {
+            e.preventDefault(); e.stopPropagation(); 
+            if (!audioUnlocked) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); var osc = audioCtx.createOscillator(); osc.connect(audioCtx.destination); osc.start(0); osc.stop(0.001); audioUnlocked = true; } catch (err) {} }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            
+            if (action === 'night') { toggleNightMode(); } 
+            else if (action === 'style') { 
+                currentStyleIdx = (currentStyleIdx + 1) % clockStyles.length;
+                applyClockStyle(); showToast("✨ Phong cách: " + (currentStyleIdx + 1) + "/30");
+            }
+            else if (action === 'wakeup') {
+                if (wakeUpHour === 5) wakeUpHour = 6;
+                else if (wakeUpHour === 6) wakeUpHour = 7;
+                else if (wakeUpHour === 7) wakeUpHour = 8;
+                else wakeUpHour = 5;
+                localStorage.setItem('wakeUpHour', wakeUpHour);
+                showToast("🌅 Cài chuyển Sáng: " + wakeUpHour + ":00");
+                updateClock();
+            }
+            else if (action === 'interval') {
+                currentIntervalIdx = (currentIntervalIdx + 1) % stepSeconds.length;
+                var mins = stepSeconds[currentIntervalIdx] / 60;
+                changeIntervalMode(currentIntervalIdx + 1);
+                showToast("⏳ Đổi thời gian ảnh: " + mins + " Phút");
+            }
+            else if (action === 'next') { forceNextSlide(); }
+            else if (action === 'chime') { showToast("🔔 Thử chuông báo"); playSolemnChime(); }
+            else if (action === 'open_location') { openLocationModal(); }
+            else if (action === 'show_birth') { showAllLists('birth'); }
+            else if (action === 'show_death') { showAllLists('death'); }
+        }
+
+        function forceNextSlide() { goToNextSlide(); changeIntervalMode(currentIntervalIdx + 1); showToast("Đang đổi ảnh..."); }
+
+        function toggleNightMode() {
+            var body = document.body;
+            if (body.classList.contains('night-active')) { 
+                forceNightMode = false; body.classList.remove('night-active'); showToast("☀️ Chào ngày mới!"); 
+                document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0)';
+                syncDriveData(); 
+            } else { 
+                forceNightMode = true; body.classList.add('night-active'); showToast("🌙 Chúc ngủ ngon!"); 
+                document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0.5)';
+                syncDriveData(); 
+            }
+            applyDynamicPositions();
+        }
+
+        function triggerBorderBurnInProtection() {
+            if (document.body.classList.contains('night-active')) return;
+            var activeImg = document.querySelector('.slide-group.active .background-blur');
+            var outerBlur = document.getElementById('outer-blur-bg');
+            var whiteBorder = document.getElementById('white-border-bg');
+            if(activeImg && activeImg.src) {
+                outerBlur.src = activeImg.src; whiteBorder.style.opacity = '0';
+                setTimeout(function() { whiteBorder.style.opacity = '1'; }, 1500);
+            }
+        }
+        setInterval(triggerBorderBurnInProtection, 600000); 
+
+        function runAntiBurnIn() { 
+            bX1 = Math.floor(Math.random() * 30) - 15; bY1 = Math.floor(Math.random() * 30) - 15; 
+            bX2 = Math.floor(Math.random() * 30) - 15; bY2 = Math.floor(Math.random() * 30) - 15; 
+            bX3 = Math.floor(Math.random() * 30) - 15; bY3 = Math.floor(Math.random() * 30) - 15; 
+            applyDynamicPositions(); 
+        }
+        setInterval(runAntiBurnIn, 60000); 
+
+        function applyDynamicPositions() {
+            var isNight = document.body.classList.contains('night-active');
+            var clockBox = document.getElementById('night-clock-box'); 
+            var infoNode = document.getElementById('info-container');
+            var rightNode = document.getElementById('top-right-wrapper');
+            var leftEventsNode = document.getElementById('bottom-left-events');
+            var rightTextNode = document.getElementById('bottom-right-text');
+            
+            if (isNight) { clockBox.style.transform = "translate(calc(-50% + " + bX1 + "px), calc(-50% + " + bY1 + "px))"; } 
+            else { 
+                clockBox.style.transform = "none"; 
+                if(infoNode) infoNode.style.transform = "translate(" + bX1 + "px, " + bY1 + "px)";
+                if(rightNode) rightNode.style.transform = "translate(" + bX2 + "px, " + bY2 + "px)";
+                if(leftEventsNode) leftEventsNode.style.transform = "translate(" + bX3 + "px, " + bY3 + "px)";
+                if(rightTextNode) rightTextNode.style.transform = "translate(" + bX3 + "px, " + bY3 + "px)";
+            }
+        }
+
+        function renderEvents(sMonth, lMonth, sDay, lDay) {
+            var leftHtml = "";
+            var currentBirths = [];
+            for (var b = 0; b < birthdays.length; b++) { if (birthdays[b].m === sMonth) currentBirths.push(birthdays[b]); }
+            currentBirths.sort(function(a, b) { return a.d - b.d; });
+
+            if (currentBirths.length > 0) {
+                leftHtml += '<div class="event-header tap-target" ontouchstart="handleAction(event, \'chime\')" onclick="handleAction(event, \'chime\')">SINH NHẬT</div>';
+                for (var i = 0; i < currentBirths.length; i++) {
+                    var birth = currentBirths[i]; var diff = birth.d - sDay; var cls = "event-item"; var txt = birth.d + "/" + birth.m + " " + birth.name;
+                    if (diff < 0) { cls += " event-passed"; } else if (diff === 0) { cls += " event-today-birth"; txt += " (Hôm nay!)"; } else if (diff <= 3) { cls += " event-urgent"; txt += " (Còn " + diff + " ngày)"; }
+                    leftHtml += '<div class="' + cls + '">' + txt + '</div>';
+                }
+            }
+            
+            var leftContainer = document.getElementById('bottom-left-events');
+            if (leftContainer && leftContainer.innerHTML !== leftHtml) { leftContainer.innerHTML = leftHtml; }
+
+            windowDeathList = [];
+            var currentDeaths = [];
+            for (var a = 0; a < anniversaries.length; a++) { if (anniversaries[a].m === lMonth) currentDeaths.push(anniversaries[a]); }
+            currentDeaths.sort(function(a, b) { return a.d - b.d; });
+
+            if (currentDeaths.length > 0) {
+                for (var j = 0; j < currentDeaths.length; j++) {
+                    var ann = currentDeaths[j]; var diff = ann.d - lDay;
+                    var shortName = ann.name.split(" (")[0]; 
+                    var txt = "Giỗ " + shortName + " (" + ann.d + "/" + ann.m + " ÂL)";
+
+                    if (diff < 0) { 
+                        windowDeathList.push('<span class="death-event-passed">' + txt + '</span>');
+                    } else {
+                        if (diff === 0) { txt = "Hôm nay " + txt; } 
+                        else if (diff <= 3) { txt = "Còn " + diff + " ngày đến " + txt; }
+                        windowDeathList.push('<span class="death-highlight">' + txt + '</span>');
+                    }
+                }
+            }
+        }
+
+        function checkForBirthdayMusic(triggerType) {
+            if (birthdays.length === 0) return;
+            var now = new Date(); var hours = now.getHours(); var minutes = now.getMinutes();
+            var birthdayPerson = null;
+            for(var i=0; i<birthdays.length; i++) {
+                if(birthdays[i].m === (now.getMonth() + 1) && birthdays[i].d === now.getDate()) { birthdayPerson = birthdays[i]; break; }
+            }
+
+            if (birthdayPerson) {
+                if (loadMorningMusicFlag === false && hours >= wakeUpHour && hours < 8) {
+                    showToast("🎂 Chúc mừng Sinh Nhật " + birthdayPerson.name + "!");
+                    playHappyBirthday(); loadMorningMusicFlag = true; 
+                }
+                if (clock8AMMusicFlag === false && hours === 8 && minutes === 0) {
+                    showToast("🎂 Chúc mừng Sinh Nhật " + birthdayPerson.name + "!");
+                    playHappyBirthday(); clock8AMMusicFlag = true; 
+                }
+                if (clock14PMMusicFlag === false && hours === 14 && minutes === 0) {
+                    showToast("🎂 Chúc mừng Sinh Nhật " + birthdayPerson.name + "!");
+                    playHappyBirthday(); clock14PMMusicFlag = true; 
+                }
+                if (clock18PMMusicFlag === false && hours === 18 && minutes === 0) {
+                    showToast("🎂 Chúc mừng Sinh Nhật " + birthdayPerson.name + "!");
+                    playHappyBirthday(); clock18PMMusicFlag = true; 
+                }
+
+                if (lastBirthdayCheckDate && lastBirthdayCheckDate !== now.getDate()) {
+                    loadMorningMusicFlag = false; clock8AMMusicFlag = false; 
+                    clock14PMMusicFlag = false; clock18PMMusicFlag = false;
+                    lastBirthdayCheckDate = now.getDate();
+                } else if (!lastBirthdayCheckDate) { lastBirthdayCheckDate = now.getDate(); }
+            } else {
+                loadMorningMusicFlag = false; clock8AMMusicFlag = false;
+                clock14PMMusicFlag = false; clock18PMMusicFlag = false;
+            }
+        }
+
+        function updateClock() {
+            var now = new Date(); var hours = now.getHours(); var minutes = now.getMinutes(); var seconds = now.getSeconds();
+            
+            if (hours === wakeUpHour && minutes === 0 && seconds === 0) { forceNightMode = null; syncDriveData(); }
+
+            var hrStr = hours < 10 ? '0' + hours : hours; var minStr = minutes < 10 ? '0' + minutes : minutes;
+            var hrNode = document.getElementById('hr-node'); var minNode = document.getElementById('min-node');
+            var nHrNode = document.getElementById('night-hr-node'); var nMinNode = document.getElementById('night-min-node');
+            
+            if(hrNode.innerText !== hrStr) hrNode.innerText = hrStr; 
+            if(minNode.innerText !== minStr) minNode.innerText = minStr;
+            
+            var nHrStr = (window.innerWidth > window.innerHeight) ? (hrStr + ":") : hrStr;
+            if(nHrNode.innerText !== nHrStr) nHrNode.innerText = nHrStr; 
+            if(nMinNode.innerText !== minStr) nMinNode.innerText = minStr;
+
+            var isNightModeToggled = document.body.classList.contains('night-active');
+            if (forceNightMode === null) {
+                var shouldBeNight = (hours >= 21 || hours < wakeUpHour);
+                if (shouldBeNight && !isNightModeToggled) { document.body.classList.add('night-active'); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0.5)';} 
+                else if (!shouldBeNight && isNightModeToggled) { document.body.classList.remove('night-active'); document.getElementById('brightness-overlay').style.background = 'rgba(0,0,0,0)';}
+            }
+
+            var checkTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0); var activePhase = phases[0];
+            for (var i = 0; i < phases.length; i++) { var d = new Date(phases[i][0], phases[i][1], phases[i][2], 0, 0, 0); if (checkTime >= d) activePhase = phases[i]; else break; }
+            var startDate = new Date(activePhase[0], activePhase[1], activePhase[2], 0, 0, 0);
+            var currentLunarDay = Math.floor((checkTime - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            var currentLunarMonth = (activePhase[1] === 0 ? 12 : activePhase[1]);
+
+            var shortDays = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
+            var solarHtml = '<span class="highlight-yellow">' + shortDays[now.getDay()] + '</span> ' + now.getDate() + '/' + (now.getMonth() + 1);
+            var solarNode = document.getElementById('date-solar-top');
+            if(solarNode.innerHTML !== solarHtml) solarNode.innerHTML = solarHtml;
+
+            var lunarHtml = '<span class="highlight-yellow">AL</span> ' + currentLunarDay + '/' + currentLunarMonth;
+            var lunarNode = document.getElementById('date-lunar-top');
+            if(lunarNode.innerHTML !== lunarHtml) lunarNode.innerHTML = lunarHtml;
+
+            renderEvents(now.getMonth() + 1, currentLunarMonth, now.getDate(), currentLunarDay);
+            applyDynamicPositions();
+            checkForBirthdayMusic('clock');
+
+            /* 🌟 ĐỘNG CƠ BÁO CHUÔNG 1 TIẾNG / LẦN (KHÔNG CHẠY KHI ĐANG NHẠC SINH NHẬT HOẶC ĐÊM) */
+            var isBirthday = false;
+            if (birthdays.length > 0) {
+                for(var j=0; j<birthdays.length; j++) {
+                    if(birthdays[j].m === (now.getMonth() + 1) && birthdays[j].d === now.getDate()) { isBirthday = true; break; }
+                }
+            }
+            if (minutes === 0 && seconds === 0 && !hourlyChimePlayed) {
+                hourlyChimePlayed = true;
+                if (!document.body.classList.contains('night-active')) {
+                    if (!(isBirthday && (hours === 8 || hours === 14 || hours === 18 || hours === wakeUpHour))) {
+                        playSolemnChime();
+                    }
+                }
+            } else if (minutes !== 0) {
+                hourlyChimePlayed = false;
+            }
+        }
+        setInterval(updateClock, 1000); 
+
+        function generateSimulatedWeather() {
+            var hr = new Date().getHours(); var baseTemp = 24; 
+            if (hr >= 11 && hr <= 15) baseTemp = 32; else if (hr >= 5 && hr <= 8) baseTemp = 22;
+            document.getElementById('weather-val').innerText = baseTemp;
+            globalHum = "75%"; globalRain = (hr > 12 && hr < 18) ? "40%" : "10%"; globalWind = "8 km/h";
+            globalUV = (hr >= 10 && hr <= 14) ? "6.8" : "0.5"; globalAlt = "473m";
+            if(globalSunrise === "--") globalSunrise = "05:24"; if(globalSunset === "--") globalSunset = "18:13";
+            if(globalAQI === "--") globalAQI = 38;
+            rotateWeatherDisplay();
+        }
+
+        function updateWeatherAndAQI() {
+            var lat = parseFloat(clientLatitude); var lon = parseFloat(clientLongitude);
+            if (isNaN(lat) || !lat) { lat = 12.6792; lon = 108.0694; }
+            var cb = new Date().getTime();
+
+            if (document.getElementById('weather-val').innerText === "--") {
+                document.getElementById('weather-val').innerText = "26";
+                globalHum = "75%"; globalRain = "10%"; globalWind = "8 km/h"; globalUV = "1.0"; globalAlt = "473m"; globalSunrise = "05:24"; globalSunset = "18:12"; globalAQI = 40;
+                rotateWeatherDisplay();
+            }
+
+            var xhrW = new XMLHttpRequest(); xhrW.timeout = 8000;
+            xhrW.open('GET', 'https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(4) + '&longitude=' + lon.toFixed(4) + '&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,uv_index&daily=sunrise,sunset&timezone=Asia%2FHo_Chi_Minh&forecast_days=1&_cb=' + cb, true);
+            xhrW.onerror = function() { generateSimulatedWeather(); }; xhrW.ontimeout = function() { generateSimulatedWeather(); };
+            xhrW.onreadystatechange = function() {
+                if (xhrW.readyState === 4 && xhrW.status === 200) {
+                    try {
+                        var d = JSON.parse(xhrW.responseText); var hr = new Date().getHours();
+                        if(d.hourly) {
+                            document.getElementById('weather-val').innerText = Math.round(d.hourly.temperature_2m[hr]);
+                            globalHum = d.hourly.relative_humidity_2m[hr] + '%'; 
+                            globalRain = (d.hourly.precipitation_probability[hr] != null ? d.hourly.precipitation_probability[hr] : 0) + '%';
+                            globalUV = d.hourly.uv_index[hr] != null ? d.hourly.uv_index[hr].toFixed(1) : "0.5";
+                        }
+                        if(d.daily && d.daily.sunrise) { globalSunrise = d.daily.sunrise[0].substring(11, 16); globalSunset = d.daily.sunset[0].substring(11, 16); }
+                        rotateWeatherDisplay();
+                    } catch(e) { generateSimulatedWeather(); }
+                }
+            }; xhrW.send();
+
+            var xhrA = new XMLHttpRequest(); xhrA.timeout = 8000;
+            xhrA.open('GET', 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + lat.toFixed(4) + '&longitude=' + lon.toFixed(4) + '&hourly=us_aqi,pm2_5&timezone=Asia%2FHo_Chi_Minh&forecast_days=1&_cb=' + cb, true);
+            xhrA.onreadystatechange = function() {
+                if (xhrA.readyState === 4 && xhrA.status === 200) {
+                    try {
+                        var d = JSON.parse(xhrA.responseText); var hr = new Date().getHours();
+                        if(d.hourly && d.hourly.us_aqi && d.hourly.us_aqi[hr] != null) { globalAQI = Math.round(d.hourly.us_aqi[hr]); } 
+                        else if (d.hourly && d.hourly.pm2_5 && d.hourly.pm2_5[hr] != null) {
+                            var pm = d.hourly.pm2_5[hr];
+                            if (pm <= 12.0) globalAQI = Math.round((50/12.0)*pm); else if (pm <= 35.4) globalAQI = Math.round(((49)/(23.4))*(pm-12.1)+51);
+                            else if (pm <= 55.4) globalAQI = Math.round(((49)/(20.0))*(pm-35.5)+101); else globalAQI = Math.round(pm + 100);
+                        }
+                        rotateWeatherDisplay();
+                    } catch(e) {}
+                }
+            }; xhrA.send();
+        }
+        setInterval(updateWeatherAndAQI, 3600000); 
+
+        function updateDynamicContentBySlide() {
+            var now = new Date(); var currentSolarMonth = now.getMonth() + 1; var sDay = now.getDate();
+            var checkTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0); var activePhase = phases[0];
+            for (var i = 0; i < phases.length; i++) { var d = new Date(phases[i][0], phases[i][1], phases[i][2], 0, 0, 0); if (checkTime >= d) activePhase = phases[i]; else break; }
+            var currentLunarMonth = (activePhase[1] === 0 ? 12 : activePhase[1]);
+            var lDay = Math.floor((checkTime - new Date(activePhase[0], activePhase[1], activePhase[2], 0, 0, 0)) / (1000 * 60 * 60 * 24)) + 1;
+
+            rotateWeatherDisplay();
+
+            var activeSpecialties = [];
+            for (var s=0; s<specialtiesData.length; s++) { if(specialtiesData[s].m === currentSolarMonth || specialtiesData[s].m === 0) activeSpecialties.push(specialtiesData[s].text); }
+
+            var finalQuote = ""; var dice = Math.random(); 
+            if (dice < 0.5 && activeSpecialties.length > 0) { finalQuote = "Mùa này " + activeSpecialties[Math.floor(Math.random() * activeSpecialties.length)]; } 
+            else if (quotePool.length > 0) { finalQuote = quotePool[Math.floor(Math.random() * quotePool.length)]; }
+            else { finalQuote = "Nhà là nơi bão dừng sau cánh cửa, nơi bình yên ấm áp nhất để trở về."; }
+
+            var nextActiveFestivalText = "";
+            var minDiff = 365;
+            for(var f=0; f<festivalsData.length; f++) {
+                var fest = festivalsData[f];
+                if(fest.type === 's' && fest.m === currentSolarMonth && fest.d >= sDay) {
+                    var diff = fest.d - sDay;
+                    if(diff < minDiff) { minDiff = diff; nextActiveFestivalText = (diff === 0 ? "Hôm nay: " : "Còn " + diff + " ngày đến ") + fest.text + " (" + fest.d + "/" + fest.m + ")"; }
+                }
+                if(fest.type === 'l' && fest.m === currentLunarMonth && fest.d >= lDay) {
+                    var diffL = fest.d - lDay;
+                    if(diffL >= 0 && diffL < minDiff) { minDiff = diffL; nextActiveFestivalText = (diffL === 0 ? "Hôm nay: " : "Còn " + diffL + " ngày đến ") + fest.text + " (" + fest.d + "/" + fest.m + " ÂL)"; }
+                }
+            }
+
+            var quoteElement = document.getElementById('quote-row');
+            quoteElement.innerHTML = finalQuote; 
+
+            setTimeout(function() {
+                var style = window.getComputedStyle(quoteElement);
+                var lineHeight = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.5);
+                var height = quoteElement.offsetHeight;
+                var linesCount = Math.round(height / lineHeight);
+
+                var extrasArray = [];
+                if(nextActiveFestivalText !== "") extrasArray.push('<span class="countdown-highlight">' + nextActiveFestivalText + '</span>');
+                if(windowDeathList.length > 0) extrasArray = extrasArray.concat(windowDeathList);
+                
+                if (extrasArray.length > 0) {
+                    var extrasStr = extrasArray.join(' <span style="color:#ffffff; font-weight:400;">|</span> ');
+                    if (linesCount <= 1) {
+                        quoteElement.innerHTML = finalQuote + '<br>' + extrasStr;
+                    } else {
+                        quoteElement.innerHTML = finalQuote + ' <span style="color:#ffffff; font-weight:400;">|</span> ' + extrasStr;
+                    }
+                }
+            }, 50);
+        }
+
+        /* 🌟 CƠ CHẾ LỌC ẢNH 48 GIỜ THÔNG MINH VÀ LẤY 1000 ẢNH TỪ DRIVE */
+        function syncDriveData() {
+            var query = encodeURIComponent("'" + FOLDER_ID + "' in parents and name = 'cauhinh.txt' and trashed = false");
+            var url = 'https://www.googleapis.com/drive/v3/files?q=' + query + '&key=' + API_KEY + '&fields=files(id)';
+            var xhr = new XMLHttpRequest(); xhr.open('GET', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.files && data.files.length > 0) { downloadConfigFile(data.files[0].id); }
+                }
+            };
+            xhr.send();
+
+            // Lấy tối đa 1000 ảnh từ thư mục
+            var imgQuery = encodeURIComponent("'" + FOLDER_ID + "' in parents and mimeType contains 'image/'");
+            var imgUrl = 'https://www.googleapis.com/drive/v3/files?q=' + imgQuery + '&pageSize=1000&key=' + API_KEY + '&fields=files(id,createdTime)';
+            var xhrDrive = new XMLHttpRequest(); xhrDrive.open('GET', imgUrl, true);
+            xhrDrive.onreadystatechange = function() {
+                if (xhrDrive.readyState === 4) {
+                    if (xhrDrive.status === 200) {
+                        var data = JSON.parse(xhrDrive.responseText);
+                        if (data.files && data.files.length > 0) {
+                            var allImgs = [];
+                            var recentImgs = [];
+                            var twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000); // Mốc 48 giờ trước
+                            
+                            for (var i = 0; i < data.files.length; i++) { 
+                                var imgPath = 'https://drive.google.com/thumbnail?id=' + data.files[i].id + '&sz=w2048';
+                                allImgs.push(imgPath);
+                                // Kiểm tra nếu ảnh tạo trong vòng 2 ngày qua
+                                if (new Date(data.files[i].createdTime) >= twoDaysAgo) {
+                                    recentImgs.push(imgPath);
+                                }
+                            }
+
+                            function shuffleArray(arr) {
+                                var a = arr.slice();
+                                for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var temp = a[k]; a[k] = a[j]; a[j] = temp; }
+                                return a;
+                            }
+
+                            // 🌟 Thuật toán tạo luồng phát (Playlist): 1 vòng ảnh mới -> Toàn bộ ảnh
+                            if (recentImgs.length > 0) {
+                                images = shuffleArray(recentImgs).concat(shuffleArray(allImgs));
+                            } else {
+                                // Nếu không có ảnh mới trong 48h, chỉ trộn ngẫu nhiên toàn bộ
+                                images = shuffleArray(allImgs);
+                            }
+                            
+                            currentIndex = 0;
+                            initSlideshow();
+                        } else { fallbackInit("Thư mục trống! Vui lòng tải ảnh lên Drive."); }
+                    } else {
+                        fallbackInit("Lỗi lấy dữ liệu đám mây. Đang dùng ảnh dự phòng...");
+                    }
+                }
+            }; xhrDrive.send();
+        }
+
+        function fallbackInit(msg) {
+            document.getElementById('quote-row').innerText = msg;
+            images = ['https://images.unsplash.com/photo-1506744626753-14002fa88301?q=80&w=2048&auto=format&fit=crop'];
+            initSlideshow();
+        }
+
+        function updateImageDisplayMechanism(imgElement, groupElement) {
+            var isScreenLandscape = (window.innerWidth > window.innerHeight);
+            var isImageLandscape = (imgElement.naturalWidth > imgElement.naturalHeight);
+            imgElement.classList.remove('fit-cover', 'fit-contain'); groupElement.classList.add('show-blur');
+            if (isScreenLandscape) { if (isImageLandscape) { imgElement.classList.add('fit-cover'); } else { imgElement.classList.add('fit-contain'); } } 
+            else { if (!isImageLandscape) { imgElement.classList.add('fit-cover'); } else { imgElement.classList.add('fit-contain'); } }
+            var nHrNode = document.getElementById('night-hr-node');
+            var hrStr = document.getElementById('hr-node').innerText;
+            if (isScreenLandscape) { nHrNode.innerText = hrStr + ":"; } else { nHrNode.innerText = hrStr; }
+        }
+
+        window.addEventListener('resize', function() {
+            var activeFg = document.getElementById(isGroup1Active ? 'fg1' : 'fg2');
+            var activeGroup = document.getElementById(isGroup1Active ? 'group1' : 'group2');
+            if (activeFg && activeFg.naturalWidth) updateImageDisplayMechanism(activeFg, activeGroup);
+        });
+
+        function loadAndDisplayImage(imgUrl, groupID, bgID, fgID) {
+            var currentGroup = document.getElementById(isGroup1Active ? 'group1' : 'group2'); var nextGroup = document.getElementById(groupID);
+            var nextBg = document.getElementById(bgID); var nextFg = document.getElementById(fgID);
+            
+            nextFg.onload = function() { 
+                updateImageDisplayMechanism(nextFg, nextGroup); 
+                currentGroup.classList.remove('active'); 
+                nextGroup.classList.add('active'); 
+                isGroup1Active = !isGroup1Active; 
+                currentIndex = (currentIndex + 1) % images.length; 
+                updateDynamicContentBySlide(); 
+            };
+            
+            nextFg.onerror = function() {
+                if (imgUrl.indexOf('unsplash.com') === -1) {
+                    fallbackInit("Mạng chập chờn. Đang lấy lại ảnh dự phòng...");
+                }
+            };
+            
+            nextBg.src = imgUrl; nextFg.src = imgUrl;
+        }
+
+        function initSlideshow() { applyClockStyle(); updateClock(); updateWeatherAndAQI(); loadAndDisplayImage(images[0], isGroup1Active ? 'group1' : 'group2', isGroup1Active ? 'bg1' : 'bg2', isGroup1Active ? 'fg1' : 'fg2'); changeIntervalMode(currentIntervalIdx + 1); }
+        function goToNextSlide() { if(images.length <= 1) return; var nextIndex = (currentIndex + 1) % images.length; loadAndDisplayImage(images[nextIndex], isGroup1Active ? 'group2' : 'group1', isGroup1Active ? 'bg2' : 'bg1', isGroup1Active ? 'fg2' : 'fg1'); }
+
+        function changeIntervalMode(modeVal) {
+            currentIntervalIdx = modeVal - 1; var seconds = stepSeconds[currentIntervalIdx];
+            if (slideInterval) clearInterval(slideInterval); slideInterval = setInterval(goToNextSlide, seconds * 1000);
+        }
+
+        // Khởi động hệ thống
+        syncDriveData();
+    </script>
 </body>
 </html>
